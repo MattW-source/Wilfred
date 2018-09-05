@@ -471,6 +471,7 @@ async def on_message(message):
                 cooldown.remove(message.author.id)
 
     except Exception as e:
+        if message.guild == None: return #Better fix this time
         await error("[500] %s" % (e), message.channel)
         
 
