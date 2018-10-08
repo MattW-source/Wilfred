@@ -25,4 +25,7 @@ Testing of the in-dev branch is ran on a twin server, contributors with the Cont
 
 # Collaborators/Staff
 Administrators of Varsity Discord are given the Collaborator role for the moderation of the Issues and Pull requests feed, not all collaborators are active developers of the bot and are required to follow the same procedures as normal users, in which they need to create their own fork unless specified otherwise.
-Staff members **should not** commit directly to any branches on this repository unless you're a approved developer (I.e. Harry)  
+Staff members **should not** commit directly to any branches on this repository unless you're a approved developer (I.e. Harry)
+
+# Disclaimer
+Having an accepted contribution to the bot does not by any means grant you partial ownership or rights to the bot. In addition approved contributions may be removed at any time by the discretion of the developer. 
