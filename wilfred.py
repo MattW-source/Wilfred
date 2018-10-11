@@ -24,6 +24,7 @@ ignore_list = ["388022143931383818", "426489102838530050", "427869023552667649"]
 Client = discord.Client()
 bot_prefix = "!"
 client = commands.Bot(command_prefix=bot_prefix, case_insensitive=True)
+client.remove_command("help")
 
 #-----Helpers-----
 
