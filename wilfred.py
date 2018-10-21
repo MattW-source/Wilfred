@@ -573,7 +573,7 @@ async def on_message(message):
 
         await client.process_commands(message)
 
-        if not str(message.author.id) in ignore_list:
+        if not str(message.author.id) in ignore_list or message.webhook_id is None:
             if not message.author.id in cooldown:
                 cooldown.append(message.author.id)
                 exp_add = random.randint(25,50)
