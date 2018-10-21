@@ -71,7 +71,7 @@ def insert_db_user(member):
     try:
         execute_query("varsity.db", "INSERT INTO Members (UserID) VALUES ('%s')" % (member.id))
     except:
-        warn("User already exists in Database")
+        cwarn("User already exists in Database")
         try:
             info(member.name)
         except:
