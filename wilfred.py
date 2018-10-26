@@ -234,10 +234,10 @@ async def rankup(ctx):
         cost = db_query("varsity.db", "SELECT RankUpCost_%s FROM ranks WHERE RankID = '%s'" % (str(tier), str(db_query("varsity.db", "SELECT RankID FROM ranks WHERE RankName = '%s'" % (rank))[0][0]+1)))[0][0]
         balance = fetch_coins(message.author)
         if cost > balance:
-            em = discord.Embed(title="Insufficient Funds!", description="You currently have $%s\nYou need $%s more to rank up!" % (str(balance), str(cost-balance)), colour=0xFF5555)
+            em = discord.Embed(title="Insufficient Funds!", description="You currently have $**%s**\nYou need $**%s** more to rank up!" % (str(balance), str(cost-balance)), colour=0xFF5555)
             await message.channel.send(embed=em)
         else:
-            em = discord.Embed(title="Rank Up", description="You currently have $%s\nAfter you rank up you will have $%s\n\nAre you sure you want to rank up?*" % (str(balance), str(balance-cost)), colour=0x55FF55)
+            em = discord.Embed(title="Rank Up", description="You currently have $**%s**\nAfter you rank up you will have $**%s**\n\nAre you sure you want to rank up?*" % (str(balance), str(balance-cost)), colour=0x55FF55)
             confirmation = await message.channel.send(embed=em)
             await confirmation.add_reaction("\U0001F44D")
             await confirmation.add_reaction("\U0001F44E")
