@@ -1,5 +1,5 @@
 # Wilfred - Varsity Discord
-Respository for Varsity Discord's Wilfred Bot, feel free to look over the source code here and use parts of it in your own discord bot.
+Respository for Varsity Discord's Wilfred Bot, feel free to look over the source code here and use parts of it in your own discord bot. Coded with discord.py rewrite.
 
 # To Do:
 - Clean up code [It's a mess]
