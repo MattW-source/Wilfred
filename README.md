@@ -3,7 +3,6 @@ Respository for Varsity Discord's Wilfred Bot, feel free to look over the source
 
 # To Do:
 - Clean up code [It's a mess]
-- Impliment Ransack Command
 - Better Suggestions System?
 
 # Known Issues:
