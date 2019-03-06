@@ -1067,29 +1067,6 @@ async def ping(ctx):
         await msg.edit(content=pongStr + " `%sms`" % (str(int(round(end-start, 0))))+" **[SUBSCRIBE TO __PEWDIEPIE__]**")
 
 
-#!connection
-@Bot.command(client)
-async def connection(ctx):
-    return
-    message = ctx.message
-    args = message.content.split()
-    global conCooldown
-    if not conCooldown:
-        conCooldown = True
-        async with message.channel.typing():
-            ping = str(int(round(st.ping()/4, 0)))
-            down = round((st.download()/1000000)*375, 2)
-            up = round((st.upload()/1000000)*350, 2)
-            em = discord.Embed(title="Connection Statistics", description="Current Connection Statistics", color=0x1671db)
-            em.add_field(name="Ping", value="`%sms`" % ping)
-            em.add_field(name="Download", value="`%s mbps`" % down)
-            em.add_field(name="Upload", value="`%s mbps`" % up)
-            await message.channel.send(embed=em)
-        await asyncio.sleep(300)
-        conCooldown = False
-    else:
-        await error("[429] Please wait before using this command again", message.channel)
-
 @Bot.command(client)
 async def debug(ctx):
     if await hasPerms(1, ctx):
@@ -1097,7 +1074,7 @@ async def debug(ctx):
         em.add_field(name="Latency", value="`Pinging...`")
         em.add_field(name="Requests Per Second", value="`%s`" % (str(random.randint(1,3))+"."+ str(random.randint(1,9))))
         em.add_field(name="DB Queue Length", value="`%s`" % (str(random.randint(21,173)))) 
-        em.add_field(name="Error Logs", value="```Unable to reach logging server...```") 
+        em.add_field(name="Error Logs", value="```Unable to reach logging server...```") #Logging server borked
         start = time.time()*1000
         msg = await ctx.message.channel.send(embed=em)
         end = time.time()*1000
@@ -1519,19 +1496,19 @@ async def statmod(ctx, *args):
                     set_coins(user, int(args[4]))
                     await message.channel.send(":ok_hand: Successfully set %s's balance to $%s" % (user.mention, args[4]))
                 elif args[3].upper() == "PROFILECOLOUR":
-                    execute_query("UPDATE Members SET profileColour = '%s' WHERE UserID = %s" % (str(args[4]), str(user.id)))
+                    execute_query("varsity.db", "UPDATE Members SET profileColour = '%s' WHERE UserID = %s" % (str(args[4]), str(user.id)))
                     await message.channel.send(":ok_hand: Successfully set %s's profile colour to %s" % (str(user.mention), str(args[4])))
                 elif args[3].upper() == "PROFILEHASHTAG":
-                    execute_query("UPDATE Members SET profileHashtag = '%s' WHERE UserID = %s" % (str(args[4]), str(user.id)))
+                    execute_query("varsity.db", "UPDATE Members SET profileHashtag = '%s' WHERE UserID = %s" % (str(args[4]), str(user.id)))
                     await message.channel.send(":ok_hand: Successfully set %s's profile hashtag to %s" % (str(user.mention), str(args[4])))
                 elif args[3].upper() == "STATATK":
-                    execute_query("UPDATE Members SET statAtk = %s WHERE UserID = %s" % (str(args[4]), str(user.id)))
+                    execute_query("varsity.db", "UPDATE Members SET statAtk = %s WHERE UserID = %s" % (str(args[4]), str(user.id)))
                     await message.channel.send(":ok_hand: Successfully set %s's attack stat to %s" % (str(user.mention), str(args[4])))
                 elif args[3].upper() == "STATDEF":
-                    execute_query("UPDATE Members SET statDef = %s WHERE UserID = %s" % (str(args[4]), str(user.id)))
+                    execute_query("varsity.db", "UPDATE Members SET statDef = %s WHERE UserID = %s" % (str(args[4]), str(user.id)))
                     await message.channel.send(":ok_hand: Successfully set %s's attack stat to %s" % (str(user.mention), str(args[4])))
                 elif args[3].upper() == "STATHP":
-                    execute_query("UPDATE Members SET statDef = %s WHERE UserID = %s" % (str(args[4]), str(user.id)))
+                    execute_query("varsity.db", "UPDATE Members SET statDef = %s WHERE UserID = %s" % (str(args[4]), str(user.id)))
                     await message.channel.send(":ok_hand: Successfully set %s's attack stat to %s" % (str(user.mention), str(args[4])))
                 else:
                     await message.channel.send("%s does not support SET modifier" % (args[3].lower()))    
@@ -1542,15 +1519,15 @@ async def statmod(ctx, *args):
                     await message.channel.send(":ok_hand: Successfully added $%s to %s's balance!" % (args[4], user.mention))
                 elif args[3].upper() == "STATATK":
                     new = int(args[4]) + int(profile[7])
-                    execute_query("UPDATE Members SET statAtk = %s WHERE UserID = %s" % (str(new), str(user.id)))
+                    execute_query("varsity.db", "UPDATE Members SET statAtk = %s WHERE UserID = %s" % (str(new), str(user.id)))
                     await message.channel.send(":ok_hand: Successfully added %s to %s's attack stat!" % (str(new), str(user.mention)))
                 elif args[3].upper() == "STATDEF":
                     new = int(args[4]) + int(profile[8])
-                    execute_query("UPDATE Members SET statDef = %s WHERE UserID = %s" % (str(new), str(user.id)))
+                    execute_query("varsity.db", "UPDATE Members SET statDef = %s WHERE UserID = %s" % (str(new), str(user.id)))
                     await message.channel.send(":ok_hand: Successfully added %s to %s's defense stat!" % (str(new), str(user.mention)))
                 elif args[3].upper() == "STATHP":
                     new = int(args[4]) + int(profile[9])
-                    execute_query("UPDATE Members SET statDef = %s WHERE UserID = %s" % (str(new), str(user.id)))
+                    execute_query("varsity.db", "UPDATE Members SET statDef = %s WHERE UserID = %s" % (str(new), str(user.id)))
                     await message.channel.send(":ok_hand: Successfully added %s to %s's health stat !" % (str(new), str(user.mention)))
                 elif args[3].upper() == "EXP":
                     add_exp(user.id, int(args[4]))
