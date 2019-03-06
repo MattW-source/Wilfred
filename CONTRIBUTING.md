@@ -14,11 +14,7 @@ If you want to contribute please fork the in-dev branch [not master] and create 
 The master branch represents the code which is currently "live" - i.e. it's being run off of the host - the in-dev branch is the branch in active development
 
 # Discord Rewards
-As I've mentioned on the discord server, you will receive rewards for contributions to the bot. The list of rewards are as follows:
-- 1 Contribution: Contributor Profile Badge
-- 3 Contributions: Contributor Rank
-- Per Contribution: $2500 in-server money
-- Active contributiors may receive additional rewards
+Sometimes we hold events in which you can earn rewards, keep posting in our #server-announcements channel and subscribe to the Wilfred Development Feed
 
 # Testing
 Testing of the in-dev branch is ran on a twin server, contributors with the Contributor Rank will be invited to this server to help with testing. The contributor role on the test server will give admin like permissions with the bot, however, everything is runnong off a seperate database and won't affect the live server.
