@@ -177,13 +177,15 @@ def insert_db_user(member):
             pass
         
 def give_item(item, member):
-    items_current = fetch_items(member.id)[0][0]
-    if items_current is None:
-        items_new = item+"_"
-    else:    
-        items_new = items_current + item +"_"
-    execute_query("varsity.db", "UPDATE Members SET items = '%s' WHERE UserID = %s" % (items_new, str(member.id)))
+    execute_query("varsity.db", "INSERT INTO items (belongsTo, itemName) VALUES (%s, '%s')" % (str(member.id), str(item)))
 
+def get_items(member):
+    return db_query("varsity.db", "SELECT itemName FROM items WHERE belongsTo = %s" % (str(member.id)))
+
+def remove_item(item, member):
+    firstItemId = db_query("varsity.db", "SELECT itemId FROM items WHERE belongsTo = %s AND itemName = '%s'" % (str(member.id), str(item)))[0][0]
+    execute_query("varsity.db", "DELETE FROM items WHERE itemId = %s" % (str(firstItemId))) #So that only one is removed, users can have multiple of the same item so we can't do it off item name.
+    
 def balance_formatter(balance):
     cBalance = "{:,}".format(balance)
     sBalance = cBalance.split(",")
@@ -211,8 +213,8 @@ def set_coins(user, coins):
 def set_coins_id(user_id, coins):
     execute_query("varsity.db", "UPDATE Members SET Balance = %s WHERE UserID = %s" % (str(coins), str(user_id)))
     
-def fetch_items(userID):
-    return db_query("varsity.db", "SELECT items FROM Members WHERE UserID = %s" % (str(userID)))
+#def fetch_items(userID):
+#    return db_query("varsity.db", "SELECT items FROM Members WHERE UserID = %s" % (str(userID)))
 
 def fetch_coins(user):
     user_id = user.id
@@ -933,23 +935,26 @@ async def suggest(ctx):
 async def items(ctx):
     if await hasPerms(1, ctx):
         args = ctx.message.content.split(" ")
-        items = fetch_items(ctx.message.author.id)
+        items = get_items(ctx.message.author)
         if len(args) == 1:
 
             em = discord.Embed(title="Items", description="You currently have the following items:", color=secondary)
 
             if items[0][0] is None or len(items[0][0]) == 0:
                 em.add_field(name="No Items", value="We couldn't find any items for you.")
-            else:    
-                itemParse = items[0][0].split("_")
-                itemStr = "\n".join(itemParse)
+            else:
+                itemStr = ""
+                for each in items: 
+                    itemStr = each[0] + "\n"
                 em.add_field(name="Items", value=itemStr)
             em.set_footer(text="Use !items use <item> to use an item")    
             await ctx.message.channel.send(embed=em)
         elif args[1].upper() == "USE":
-            item = " ".join(args[2:])
-            itemParse = items[0][0].upper().split("_")
-            if not item.upper() in itemParse:
+            itemArray = []
+            for each in items:
+                itemArray.append(each.upper())
+                 
+            if not item.upper() in itemArray:
                 await ctx.message.channel("You do not have this item")
                 return
             if item.upper() == "MAGICAL RANSACK KEY":
@@ -978,20 +983,7 @@ async def items(ctx):
                             add_coins(msg.author, nicked)
                             await msg.channel.send("Successfully ransacked %s for $%s!" % (target.mention, str(nicked)))
 
-                            items = fetch_items(ctx.message.author.id)
-                            itemParse = items[0][0].split("_")
-                            index = 0
-                            for items in itemParse:
-                                if items.upper() == item.upper():
-                                    itemParse.pop(index)
-                                    break
-                                else:
-                                    index = index + 1
-                            if len(itemParse) == 0:
-                                execute_query("varsity.db", "UPDATE Members SET Items = Null WHERE UserID = %s" % (str(ctx.message.author.id)))
-                            else:    
-                                itemsDb = "_".join(itemParse)
-                                execute_query("varsity.db", "UPDATE Members SET Items = '%s' WHERE UserID = %s" % (itemsDb, str(ctx.message.author.id)))
+                            remove_item("MAGICAL RANSACK KEY", ctx.message.author) 
             elif item.upper() == "MYTHICAL RANSACK KEY":
                 """
                 This Key Will Allow The User To Ransack 50% Of A Users Balance Without Fail
@@ -1018,17 +1010,7 @@ async def items(ctx):
                             add_coins(msg.author, nicked)
                             await msg.channel.send("Successfully ransacked %s for $%s!" % (target.mention, str(nicked)))
 
-                            items = fetch_items(ctx.message.author.id)
-                            itemParse = items[0][0].split("_")
-                            index = 0
-                            for items in itemParse:
-                                if items.upper() == item.upper():
-                                    itemParse.pop(index)
-                                    break
-                                else:
-                                    index = index + 1
-                            itemsDb = "_".join(itemParse)
-                            execute_query("varsity.db", "UPDATE Members SET Items = '%s' WHERE UserID = %s" % (itemsDb, str(ctx.message.author.id)))
+                            remove_item("MYTHICAL RANSACK KEY", ctx.message.author)
             else:
                 ctx.message.channel.send("Invalid Item")
                             
