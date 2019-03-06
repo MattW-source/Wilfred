@@ -306,6 +306,16 @@ def add_exp(userID, amount):
     set_exp(userID, new_exp)
     set_exp_max(userID, new_max)
 
+def add_booster(userID, multiplier, expires):
+    execute_query("varsity.db", "INSERT INTO boosters (userID, multiplier, expires) VALUES (%s, %s, %s)" % (str(userID), str(multiplier), str(expires)))
+
+def get_booster(userID):
+    boost = db_query("varsity.db", "SELECT multiplier FROM boosters WHERE userID = %s AND isActive = 1" % (str(userID)))
+    if len(boost) == 0:
+        return 1
+    else:
+        return boost[0][0]
+    
 def get_rank(user):
     rank = []
     if "Moderators" in [role.name for role in user.roles]:
@@ -424,10 +434,8 @@ async def daily(ctx):
             elif reward[0] == "m":
                 user = message.author
                 multiplier = reward[1]
-                expires = int("".join(reward[2:]))
-                execute_query("varsity.db", "UPDATE Members SET expPersonalBoost = %s WHERE UserID = %s" (str(multiplier), str(user.id)))
-                await asyncio.sleep(expires*60)
-               
+                expires = time.time() + int("".join(reward[2:]))
+                add_booser(user.id, multiplier, expires)
                 
         #rewards.append("b <:festive2018:526858321991303176>")
         #em = discord.Embed(title="[1] MYTHICAL", description="Mythical Festive 2018 Badge", color=0xFF5555)
@@ -574,46 +582,38 @@ async def buy(ctx):
             else:
                 await message.channel.send("Insufficient Funds")
         if args[1] == "4":
-            if db_query("varsity.db", "SELECT expPersonalBoost FROM Members WHERE UserID = %s" % (str(message.author.id)))[0][0] > 1:
+            if get_booster(message.author.id) > 1:
                 await error("You already have an active exp booster", ctx.message.channel)
             elif fetch_coins(message.author) >= 2000000:
                 em = discord.Embed(title="Purchase Complete", description="You have successfully purchased `24 Hour 2* Personal Multiplier`.", color=reds)
                 add_coins(message.author, -2000000)
                 await message.channel.send(embed=em)
-                execute_query("varsity.db", "UPDATE Members SET expPersonalBoost = 2 WHERE UserID = %s" % (message.author.id))
-                await asyncio.sleep(86400)
-                execute_query("varsity.db", "UPDATE Members SET expPersonalBoost = 1 WHERE UserID = %s" % (message.author.id))
-                
+                add_booster(message.author.id, 2, time.time()+86400)
+                #execute_query("varsity.db", "UPDATE Members SET expPersonalBoost = 2 WHERE UserID = %s" % (message.author.id))
             else:
                 await message.channel.send("Insufficient Funds")
         if args[1] == "5":
-            if db_query("varsity.db", "SELECT expPersonalBoost FROM Members WHERE UserID = %s" % (str(message.author.id)))[0][0] > 1:
+            if get_booster(message.author.id) > 1:
                 await error("You already have an active exp booster", ctx.message.channel)
             elif fetch_coins(message.author) >= 2000000:
                 em = discord.Embed(title="Purchase Complete", description="You have successfully purchased `1 Hour 3* Personal Multiplier`.", color=reds)
                 add_coins(message.author, -2000000)
                 await message.channel.send(embed=em)
-                execute_query("varsity.db", "UPDATE Members SET expPersonalBoost = 3 WHERE UserID = %s" % (message.author.id))
-                await asyncio.sleep(3600)
-                execute_query("varsity.db", "UPDATE Members SET expPersonalBoost = 1 WHERE UserID = %s" % (message.author.id))
+                add_booster(message.author.id, 3, time.time()+3600)
             else:
                 await message.channel.send("Insufficient Funds")        
         if args[1] == "6":
             if fetch_coins(message.author) >= 500000:
-                if db_query("varsity.db", "SELECT Level FROM Members WHERE UserID = 1")[0][0] > 1:
+                if get_booster(1) > 1:
                     await error("There is already an active booster", ctx.message.channel)
                 else:    
                     em = discord.Embed(title="Purchase Complete", value="You have successfully purchased `1 Hour 2* Global Multipler`.", color=reds)
                     add_coins(message.author, -500000)
                     await message.channel.send(embed=em)
-                    level_up(1, 2)
-                    await asyncio.sleep(3600)
-                    level_up(1, 1)
+                    add_booster(1, 2, time.time()+3600)
             else:
                 await message.channel.send("Insufficient Funds")        
      
-            
-
 #!help
 @Bot.command(client)
 async def help(ctx):
@@ -1752,7 +1752,7 @@ async def on_ready():
                 lbString = lbString + "%sth <@%s> - Level %s (%s exp)\n" % (str(count+1), str(leaderboard[count][0]), str(leaderboard[count][1]), str(leaderboard[count][2]))
 
             em = discord.Embed(title="Leaderboard", description=lbString, colour=secondary)
-            em.add_field(name="Current EXP Multipler", value=str(db_query("varsity.db", "SELECT Level from Members WHERE UserID = 1")[0][0]))
+            em.add_field(name="Current EXP Multipler", value=str(get_booster(1)))
             em.set_footer(text="Last Updated: %s" % (time.strftime("%a, %H:%M:%S", time.gmtime()))) 
             await LBoardExp.edit(embed=em, content=None)
 
@@ -1781,13 +1781,18 @@ async def on_ready():
             em.set_footer(text="Last Updated: %s" % (time.strftime("%a, %H:%M:%S", time.gmtime()))) 
             await LBoardBal.edit(embed=em, content=None)
 
-            multiplier = db_query("varsity.db", "SELECT Level FROM Members WHERE UserID = 1")[0][0]
+            multiplier = get_booster(1)
             for member in client.get_channel(529107387559444500).members:
-                pMultiplier = db_query("varsity.db", "SELECT expPersonalBoost FROM Members WHERE UserID = %s" % (str(member.id)))[0][0]
+                pMultiplier = get_booster(member.id)
                 add_exp(member.id, 2*multiplier*pMultiplier)
             for member in client.get_channel(530196127388008448).members:
-                pMultiplier = db_query("varsity.db", "SELECT expPersonalBoost FROM Members WHERE UserID = %s" % (str(member.id)))[0][0]
+                pMultiplier = get_booster(member.id)
                 add_exp(member.id, 2*multiplier*pMultiplier)
+
+            multipliers = db_query("SELECT boosterId, expires FROM boosters WHERE isActive = 1")
+            for multiplier in multiplier:
+                if multiplier[1] < time.time():
+                    execute_query("UPDATE boosters SET isActive = 0 WHERE boosterId = %s" % (str(multiplier[0]))) 
         except:
             pass #basically gonna stop the whole thing breaking
         await asyncio.sleep(60)
@@ -1949,8 +1954,8 @@ Have fun!""", color=primary)
 
     if not str(message.author.id) in ignore_list and not str(message.channel.id) in ignore_list and not "Restricted" in [role.name for role in message.author.roles] and not message.guild == None:
         if not message.author.id in cooldown:
-            multiplier = db_query("varsity.db", "SELECT Level FROM Members WHERE UserID = 1")[0][0]
-            pMultiplier = db_query("varsity.db", "SELECT expPersonalBoost FROM Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
+            multiplier = get_booster(1)
+            pMultiplier = get_booster(message.author.id)
             bal = db_query("varsity.db", "SELECT Balance FROM Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
             level = get_profile(message.author.id)[1]
             cooldown.append(message.author.id)
