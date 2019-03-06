@@ -9,7 +9,7 @@ import _thread as thread
 import random
 
 #time.sleep(30) #Give Server time to init networking [Since this is now being autoran under SystemD] 
-token = "REDACTED"
+token = ""
 buildVersion = "020319.r2"
 
 from secrets import * #Token will be stored in here so I don't accidentally leak the admin token for my Discord again...
@@ -350,27 +350,6 @@ async def accept(ctx):
 async def deny(ctx):
     if ctx.message.channel.id == gate:
         await ctx.message.author.kick()
-
-#--Event Commands--
-@Bot.command(client)
-async def donate(ctx):
-    return
-    message = ctx.message
-    args = message.content.split(" ")
-    amount = int(args[1])
-    if amount > fetch_coins(message.author):
-        await message.channel.send("Insufficient Funds")
-    else:
-        add_coins(message.author, -amount)
-        add_coins_id(1, amount)
-        await message.channel.send("Successfully Donated **$%s**" % (str(amount)))
-        
-
- 
-            
-            
-        
-    
 
 #--Profile/Economy/User Commands--
 
@@ -838,71 +817,6 @@ async def pay(ctx):
                 else:
                     await message.channel.send("Invalid Response - Transaction Cancelled")
 
-#!rankup
-@Bot.command(client)
-async def rankup(ctx):
-    #await error("This command is now depreciated", ctx.message.channel)
-    return
-    message = ctx.message
-    args = message.content.split()
-    rank = db_query("varsity.db", "SELECT Rank from Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
-    tier = db_query("varsity.db", "SELECT Tier from Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
-    if rank == "X":
-        em = discord.Embed(title="Error!", description="You've already reached the highest rank. Try **!prestige**", colour=0xFF5555)
-        await message.channel.send(embed=em)
-    else:
-        cost = db_query("varsity.db", "SELECT RankUpCost_%s FROM ranks WHERE RankID = '%s'" % (str(tier), str(db_query("varsity.db", "SELECT RankID FROM ranks WHERE RankName = '%s'" % (rank))[0][0]+1)))[0][0]
-        balance = fetch_coins(message.author)
-        if cost > balance:
-            em = discord.Embed(title="Insufficient Funds!", description="You currently have $%s\nYou need $%s more to rank up!" % (str(balance), str(cost-balance)), colour=0xFF5555)
-            await message.channel.send(embed=em)
-        else:
-            em = discord.Embed(title="Rank Up", description="You currently have $%s\nAfter you rank up you will have $%s\n\nAre you sure you want to rank up?*" % (str(balance), str(balance-cost)), colour=primary)
-            confirmation = await message.channel.send(embed=em)
-            await confirmation.add_reaction("\U0001F44D")
-            await confirmation.add_reaction("\U0001F44E")
-
-            def check(reaction, user):
-                return user == message.author and (str(reaction.emoji) == '\U0001F44D' or str(reaction.emoji) == "\U0001F44E")
-            try:
-                reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
-            except asyncio.TimeoutError:
-                await message.channel.send('Timed Out')
-            else:
-                if str(reaction.emoji) == "\U0001F44D":
-                    new_rank = db_query("varsity.db", "SELECT RankName FROM ranks WHERE RankID = '%s'" % (str(db_query("varsity.db", "SELECT RankID FROM ranks WHERE RankName = '%s'" % (rank))[0][0]+1)))[0][0]
-                    add_coins(message.author, -cost)
-                    execute_query("varsity.db", "UPDATE Members SET Rank = '%s' WHERE UserID = %s" % (new_rank, str(message.author.id)))
-                    em = discord.Embed(title="Success!", description="Congratulations! You've ranked up to Rank %s" % (new_rank), colour=0x55FFFF)
-                    await message.channel.send(embed=em)
-                elif str(reaction.emoji) == "\U0001F44E":
-                    await message.channel.send("Rankup Declined")
-                await confirmation.clear_reactions()
-
-#!coinflip
-@Bot.command(client)
-async def coinflip(ctx):
-    #error("This command is no longer available")
-    return
-    message = ctx.message
-    args = message.content.split(" ")
-    chance = random.randint(1,3)
-    bet = args[1]
-    if int(bet) > fetch_coins(message.author) or int(bet) <= 0:
-        await message.channel.send("Insufficient Funds")
-    elif int(bet) > 250000 and "Moderators" not in [role.name for role in message.author.roles]:
-        await error("Your bet exceeds the max allowed for MEMBER - Limit: 250,000", ctx.message.channel)
-    elif int(bet) > 250000 and "Moderators" in [role.name for role in message.author.roles]:
-        await error("Your bet exceeds the max allowed for MODERATOR - Limit: 250,000", ctx.message.channel)
-    else:
-        if chance == 1 or message.author.id == 345514405775147023:
-            em = discord.Embed(title="Coin Flip", description="You successfully won $%s with a 0.5 chance" % (bet), color=primary)
-            await message.channel.send(embed=em)
-            add_coins(message.author, int(bet))
-        else:
-            em = discord.Embed(title="Coin Flip", description="You lost $%s" % (bet), color=0xFF5555)
-            await message.channel.send(embed=em)
-            add_coins(message.author, -int(bet))
             
 #!ransack
 @Bot.command(client)
@@ -957,49 +871,6 @@ async def ransack(ctx):
                 add_coins(user, int(round(amount/2, 0)))
 
 
-#!prestige
-@Bot.command(client)
-async def prestige(ctx):
-    #await error("This command is now depreciated", ctx.message.channel)
-    return
-    message = ctx.message
-    args = message.content.split()
-    rank = db_query("varsity.db", "SELECT Rank from Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
-    tier = db_query("varsity.db", "SELECT Tier from Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
-    if not rank == "X":
-        await error("[401] You need to reach rank X first!", message.channel)
-    else:
-        if tier == 3:
-            await error("[401] You have reached max prestige!", message.channel) 
-        else:
-            em = discord.Embed(title="WARNING", description="Prestiging will reset your balance and rank back to defaults but will upgrade your tier and unlock new perks.\n\nRanking up again will cost more than it did last time!\n\nAre you sure you want to prestige? **Y/N**", colour=0xFF5555) 
-            await message.channel.send(embed=em)
-
-            def check(m):
-                return m.author.id == message.author.id
-
-            try:
-                msg = await client.wait_for('message', check=check, timeout=30.0)
-            except asyncio.TimeoutError:
-                await channel.send("Did not respond in time, please try again!")
-            else:
-                if msg.content.upper() == "Y" or msg.content.upper() == "YES":
-                    add_coins(message.author, -fetch_coins(message.author))
-                    new_tier = tier + 1
-                    execute_query("varsity.db", "UPDATE Members SET Tier = %s, Rank = 'I' where UserID = %s" % (str(new_tier), str(message.author.id)))
-                    if new_tier == 1:
-                        await message.author.add_roles(discord.utils.get(message.guild.roles, id=472094980350148608))
-                    if new_tier == 2:
-                        await message.author.add_roles(discord.utils.get(message.guild.roles, id=472095274618060831))
-                    if new_tier == 3:
-                        await message.author.add_roles(discord.utils.get(message.guild.roles, id=472095322378600458))
-                    em = discord.Embed(title="Success!", description="Congratulations! You've prestiged to Tier %s!" % (new_tier), colour=0x55FFFF)
-                    await message.channel.send(embed=em)
-                    
-                elif msg.content.upper() == "N" or msg.content.upper() == "NO":
-                    await message.channel.send("Rankup Declined")
-                else:
-                    await message.channel.send("Invalid Response")
 
 #!tag
 @Bot.command(client)
@@ -1558,30 +1429,6 @@ async def train(ctx):
                 await confirmation.clear_reactions()
     training.remove(message.author.id)
             
-                
-        
-            
-    
-
-@Bot.command(client)
-async def marry(ctx):
-    await ctx.send("Error: **This command has been removed**")
-    return
-    if "Moderators" in [role.name for role in ctx.message.author.roles] or "Outstandingly Regular" in [role.name for role in ctx.message.author.roles]:
-        args = ctx.message.content.split(" ")
-        target = " ".join(args[1:])
-        await ctx.send("%s has married **%s**!" % (ctx.message.author.mention, target))
-
-@Bot.command(client)
-async def forcemarry(ctx):
-    await ctx.send("Error: **This command has been removed**")
-    return
-    if "Moderators" in [role.name for role in ctx.message.author.roles]:
-        args = ctx.message.content.split(" ")
-        target1 = args[1]
-        target2 = args[2]
-        await ctx.send("%s has married **%s**!" % (target1, target2))        
-
 #!quickmaths
 @Bot.command(client)
 async def quickmaths(ctx):
