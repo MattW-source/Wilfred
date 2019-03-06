@@ -10,7 +10,7 @@ import random
 
 #time.sleep(30) #Give Server time to init networking [Since this is now being autoran under SystemD] 
 token = ""
-buildVersion = "020319.r2"
+buildVersion = "060319.In-Dev"
 
 from secrets import * #Token will be stored in here so I don't accidentally leak the admin token for my Discord again...
 
@@ -1443,54 +1443,79 @@ async def badge(ctx):
 #!disable
 @Bot.command(client)
 async def disable(ctx, *args):
+    '''
+    Allow the Moderation Team to temporarily disable a command.
+
+    Required Permission: @Moderator
+    Required Arguments: Command
+
+    '''
     if await hasPerms(32, ctx):
         message = ctx.message
         args = message.content.split()
-    
         command = "!"+args[1].lower()
         if command == "!disable" or command == "!enable":
             await error("[401] You cannot disable that command!", message.channel)
-            return False
-            
-        if not command in disabled_commands:
-            disabled_commands.append(command)
-            await message.channel.send(":ok_hand: Successfully disabled `%s`" % command)
+        else:    
+            disabledCommands = db_query("varsity.db", "SELECT command FROM disabledCommands WHERE command = '%s'" % (command))
+            if len(disabledCommands) == 0:
+                execute_query("varsity.db", "INSERT INTO disabledCommands VALUES ('%s')" % (command)) 
+                await ctx.send(":ok_hand: Successfully disabled `%s`" % command)
+            else:
+                await ctx.send("Hmm, Looks as if that command is already disabled.")
         
 #!enable    
 @Bot.command(client)
 async def enable(ctx, *args):
+    '''
+    Allow the Moderation Team to enable a command that was prviously disabled.
+
+    Required Permission: @Moderator
+    Required Arguments: Command
+
+    '''
     if await hasPerms(32, ctx):
         message = ctx.message
         args = message.content.split()
-    
         command = "!"+args[1]
-        if command in disabled_commands:
-            disabled_commands.remove(command)
-            await message.channel.send(":ok_hand: Successfully enabled `%s`" % command)
-        else:
-            await error("[409] This command is already enabled", message.channel)
+        disabledCommands = db_query("varsity.db", "SELECT command FROM disabledCommands WHERE command = '%s'" % (command))
+        if len(disabledCommands) == 0:
+            await ctx.send("Hmm, Doesn't look like that command is disabled at the moment.")
+        else:    
+            execute_query("varsity.db", "DELETE FROM disabledCommands WHERE command = '%s'" % (command)) 
+            await ctx.send(":ok_hand: Successfully enabled `%s`" % command)
+        
 
 @Bot.command(client)
 async def statmod(ctx, *args):
+    '''
+    Allow the Moderation Team to manually edit the stats stored in the database for a specified user.
+
+    Required Permission: @Moderator
+    Required Arguments: User Mention
+    Optional Arguments: Modifier, Stat
+
+    '''
     if await hasPerms(32, ctx):
-        try:
-            message = ctx.message
-            args = message.content.split()
-            user = discord.utils.get(message.guild.members, mention=args[1])
-            profile = get_profile(user.id)
-            if len(args) == 2:
-                em = discord.Embed(title="Statmod", description="You are able to modify the following stats for user %s" % (user.name), color=reds)
-                em.add_field(name="balance", value=str(profile[0]))
-                em.add_field(name="profileColour", value=str(profile[4]))
-                em.add_field(name="profileHashtag", value=str(profile[5]))
-                em.add_field(name="exp", value=str(profile[2]))
-                em.add_field(name="statAtk", value=str(profile[7]))
-                em.add_field(name="statDef", value=str(profile[8]))
-                em.add_field(name="statHp", value=str(profile[9]))
-                await message.channel.send(embed=em)
-                return
-                
+        message = ctx.message
+        args = message.content.split()
+        user = discord.utils.get(message.guild.members, mention=args[1])
+        profile = get_profile(user.id)
+        if len(args) == 2:
+            em = discord.Embed(title="Statmod", description="You are able to modify the following stats for user %s" % (user.name), color=reds)
+            em.add_field(name="balance", value=str(profile[0]))
+            em.add_field(name="profileColour", value=str(profile[4]))
+            em.add_field(name="profileHashtag", value=str(profile[5]))
+            em.add_field(name="exp", value=str(profile[2]))
+            em.add_field(name="statAtk", value=str(profile[7]))
+            em.add_field(name="statDef", value=str(profile[8]))
+            em.add_field(name="statHp", value=str(profile[9]))
+            await message.channel.send(embed=em)
+        elif len(args) == 1:
+            await ctx.send("Invalid Usage, Please supply a user")
+        else:   
             subcommand = args[2]
+            
             if subcommand.upper() == "SET":
                 if args[3].upper() == "BALANCE":
                     set_coins(user, int(args[4]))
@@ -1535,7 +1560,6 @@ async def statmod(ctx, *args):
                 else:
                     await message.channel.send("%s does not support ADD modifier" % (args[3].lower()))  
                     
-
             elif subcommand.upper() == "WIPE":
                 em = discord.Embed(title="STAT WIPE", description="You are about to wipe the stats of %s!\n\n This will completely reset their stats as if they were a new user.\n**THIS OPERATION CANNOT BE REVERSED**\n\n**Punishments will not be reset**\n\nPlease wait **15 Seconds** before confirming this action." % (user.mention), colour=0xAA0000)
                 em.set_thumbnail(url="https://www.freeiconspng.com/uploads/status-warning-icon-png-29.png")
@@ -1570,10 +1594,7 @@ async def statmod(ctx, *args):
                 em.add_field(name="statDef", value=str(profile[8]))
                 em.add_field(name="statHp", value=str(profile[9]))
                 await message.channel.send(embed=em)
-                
-        except IndexError:
-            await error("[400] Invalid Usage.`\n_ _\nCommand Syntax:\n `!statmod <@user> <set|add|sub> <balance|rank|tier|statwipe> {amount}", message.channel)
-                
+         
 @Bot.command(client)
 async def announce(ctx):
     if await hasPerms(32, ctx):
@@ -1759,15 +1780,6 @@ async def on_ready():
             em = discord.Embed(title="Baltop", description=lbString, colour=secondary)
             em.set_footer(text="Last Updated: %s" % (time.strftime("%a, %H:%M:%S", time.gmtime()))) 
             await LBoardBal.edit(embed=em, content=None)
-            #coins = db_query("varsity.db", "SELECT Balance FROM Members WHERE UserID = 1")[0][0]
-            #em = discord.Embed(title="Records", description="""**COMING SOON**
-
-    #Most Balance: **$2.51M** Held By <@522506204346581013>
-    #Largest Ransack: **None** Held By **None**
-    #Largest Payment: **None** Held By **None**
-    #Most Invites: **None** Held By **None** 
-    #""", color=reds)
-            #await LBoardRecords.edit(embed=em, content=None)
 
             multiplier = db_query("varsity.db", "SELECT Level FROM Members WHERE UserID = 1")[0][0]
             for member in client.get_channel(529107387559444500).members:
@@ -1779,132 +1791,124 @@ async def on_ready():
         except:
             pass #basically gonna stop the whole thing breaking
         await asyncio.sleep(60)
-        
-      
-         
-CEH = True
-    
-
+ 
+#Pre Command Invoke Processing
 @client.event
 async def on_message(message):
-       
+      
     mSplit = message.content.split()
     mList = []
     for word in mSplit:
-        user = discord.utils.get(message.guild.members, mention=word.replace("@", "@!").replace("!!", "!"))
+        user = discord.utils.get(message.guild.members, mention=word.replace("@", "@!").replace("!!", "!")) #To prevent issues with mentioning not working in args for mobile users (A formatting issue on Discord's end which they refuse to fix...)
         if not user is None:
             if not user.nick is None:
                 word = word.replace("@", "@!").replace("!!", "!")
         mList.append(word)
     message.content = " ".join(mList)
-
-    #rate = random.randint(1,20)            
-    #if rate == 1:        
-    #    await error("412 Precondition Failed: 'wss://gateway.discord.gg/?v=6' evaluated to false", message.channel)
-    #    return
     
     args = message.content.split(" ")
 
     if args[0] in ["?playing", "?play", "?next", "?skip", "?playlist", "?register", "?volume", "?say"]:
         if await hasPerms(16, message):
             pass
-
-    #print(message.content)
-
-    global conCooldown
-    global disabled_commands
-
-    
-
-    if args[0].lower() in disabled_commands:
+        
+    disabledCommands = db_query("varsity.db", "SELECT command FROM disabledCommands WHERE command = '%s'" % (command))
+    if len(disabledCommands) > 0:
         await error("[423] This command is currently disabled", message.channel)
-        return False
-    channel = message.channel
-    
-    '''We'll keep this encase we want to enable it again for some random reason'''
-    #for each in args:
-    #    if each.upper()=="MAY":
-    #        quote = random.choice(["The Government cannot just be consumed by Brexit. There is so much more to do", "My whole philosophy is about doing, not talking.", "I actually think I think better in high heels", "I've been clear that Brexit means Brexit", "I think we all agree that the comments Donald Trump made in relation to Muslims were divisive, unhelpful and wrong.", "There must be no attempts to remain inside the E.U., no attempts to rejoin it through the back door, and no second referendum.", "Strong and Stable leadership"])
-    #        await message.channel.send(quote)
-                     
-    if message.channel.id == gate:
-        await message.delete()        
-  
-    elif message.content.upper().startswith("!ENTER"):
-        global raffles
-        global enteries
-        if raffles and not message.author.name in enteries:
-            enteries.append(message.author.name)
-            await message.channel.send("%s has been entered!" % (message.author.name))
-        elif raffles:
-            await message.channel.send("You are already entered")
+    else:
+        channel = message.channel
+        
+        '''We'll keep this encase we want to enable it again for some random reason'''
+        #for each in args:
+        #    if each.upper()=="MAY":
+        #        quote = random.choice(["The Government cannot just be consumed by Brexit. There is so much more to do", "My whole philosophy is about doing, not talking.", "I actually think I think better in high heels", "I've been clear that Brexit means Brexit", "I think we all agree that the comments Donald Trump made in relation to Muslims were divisive, unhelpful and wrong.", "There must be no attempts to remain inside the E.U., no attempts to rejoin it through the back door, and no second referendum.", "Strong and Stable leadership"])
+        #        await message.channel.send(quote)
+                         
+        if message.channel.id == gate:
+            await message.delete()        
+      
+        elif message.content.upper().startswith("!ENTER"):
+            global raffles
+            global enteries
+            if raffles and not message.author.name in enteries:
+                enteries.append(message.author.name)
+                await message.channel.send("%s has been entered!" % (message.author.name))
+            elif raffles:
+                await message.channel.send("You are already entered")
 
-    #--Role Commands--             
+        #--Role Commands--             
 
-    elif message.content.upper().startswith("!WINDOWS"):
-        role = discord.utils.get(message.guild.roles, name="Windows Insiders")
-        if not role.name in [r.name for r in message.author.roles]:
-            await message.author.add_roles(role)
-            await message.channel.send("Successfully added you to the **Windows Insiders** announcement group")
-        else:
-            await message.author.remove_roles(role)
-            await message.channel.send("Successfully removed you from the **Windows Insiders** announcement group")
+        elif message.content.upper().startswith("!WINDOWS"):
+            role = discord.utils.get(message.guild.roles, name="Windows Insiders")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Windows Insiders** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Windows Insiders** announcement group")
 
-    elif message.content.upper().startswith("!APPLE"):
-        role = discord.utils.get(message.guild.roles, name="Apple Developers")
-        if not role.name in [r.name for r in message.author.roles]:
-            await message.author.add_roles(role)
-            await message.channel.send("Successfully added you to the **Apple Developers** announcement group")
-        else:
-            await message.author.remove_roles(role)
-            await message.channel.send("Successfully removed you from the **Apple Developers** announcement group")
-            
-    elif message.content.upper().startswith("!ANDROID"):
-        role = discord.utils.get(message.guild.roles, name="Android Beta")
-        if not role.name in [r.name for r in message.author.roles]:
-            await message.author.add_roles(role)
-            await message.channel.send("Successfully added you to the **Android Beta** announcement group")
-        else:
-            await message.author.remove_roles(role)
-            await message.channel.send("Successfully removed you from the **Android Beta** announcement group")
-            
-    elif message.content.upper().startswith("!TECH"):
-        role = discord.utils.get(message.guild.roles, name="Technology")
-        if not role.name in [r.name for r in message.author.roles]:
-            await message.author.add_roles(role)
-            await message.channel.send("Successfully added you to the **Technology** announcement group")
-        else:
-            await message.author.remove_roles(role)
-            await message.channel.send("Successfully removed you from the **Technology** announcement group")
-            
-    elif message.content.upper().startswith("!SERVER"):
-        role = discord.utils.get(message.guild.roles, name="Server Announcements")
-        if not role.name in [r.name for r in message.author.roles]:
-            await message.author.add_roles(role)
-            await message.channel.send("Successfully added you to the **Server Announcements** announcement group")
-        else:
-            await message.author.remove_roles(role)
-            await message.channel.send("Successfully removed you from the **Server Announcements** announcement group")
+        elif message.content.upper().startswith("!APPLE"):
+            role = discord.utils.get(message.guild.roles, name="Apple Developers")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Apple Developers** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Apple Developers** announcement group")
+                
+        elif message.content.upper().startswith("!ANDROID"):
+            role = discord.utils.get(message.guild.roles, name="Android Beta")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Android Beta** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Android Beta** announcement group")
+                
+        elif message.content.upper().startswith("!TECH"):
+            role = discord.utils.get(message.guild.roles, name="Technology")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Technology** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Technology** announcement group")
+                
+        elif message.content.upper().startswith("!SERVER"):
+            role = discord.utils.get(message.guild.roles, name="Server Announcements")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Server Announcements** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Server Announcements** announcement group")
 
-    elif message.content.upper().startswith("!WILFRED"):
-        role = discord.utils.get(message.guild.roles, name="Wilfred Development")
-        if not role.name in [r.name for r in message.author.roles]:
-            await message.author.add_roles(role)
-            await message.channel.send("Successfully added you to the **Wilfred Development** announcement group")
-        else:
-            await message.author.remove_roles(role)
-            await message.channel.send("Successfully removed you from the **Wilfred Development** announcement group")
+        elif message.content.upper().startswith("!WILFRED"):
+            role = discord.utils.get(message.guild.roles, name="Wilfred Development")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Wilfred Development** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Wilfred Development** announcement group")
 
-    
-
-   
-    elif message.content.upper().startswith("W!UPDATE"):
-        for member in message.guild.members:
-            try:
-                #insert_db_user(member)
-                execute_query("varsity.db", "UPDATE Members SET displayName = '%s' WHERE UserID = %s" % (member.name, str(member.id)))
-            except:
-                pass
+        elif message.content.upper().startswith("!SUDO"): #This needs to be moved under cmd-ext; Will be done at later stage ~Frank
+            if hasPerms(32, message):
+                args = message.content.split()
+                target = discord.utils.get(message.guild.members, mention=args[1])
+                channel = client.get_channel(int(args[2]))
+                contents = " ".join(args[3:])
+                message.content = contents
+                message.author = target
+                message.channel = channel
+       
+        elif message.content.upper().startswith("W!UPDATE"):
+            for member in message.guild.members:
+                try:
+                    #insert_db_user(member)
+                    execute_query("varsity.db", "UPDATE Members SET displayName = '%s' WHERE UserID = %s" % (member.name, str(member.id)))
+                except:
+                    pass
 
     if message.channel.id in [473284192491536384, 483940602040549376]:
         hasMsg = db_query("varsity.db", "SELECT devMsg FROM Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
@@ -1938,27 +1942,12 @@ Please be reminded that this is a commands only channel, discussion is not permi
 
 Have fun!""", color=primary)
 
-            await message.channel.send(embed=em) 
-
-        
-
-    if message.content.upper().startswith("!SUDO"):
-        if message.author.id == 432329360863920148:
-            args = message.content.split()
-            target = discord.utils.get(message.guild.members, mention=args[1])
-            channel = client.get_channel(int(args[2]))
-            contents = " ".join(args[3:])
-            message.content = contents
-            message.author = target
-            message.channel = channel
-
-    if message.guild == None:
-        return
+            await message.channel.send(embed=em)
 
     if not "Restricted" in [role.name for role in message.author.roles]:
-        await client.process_commands(message)
+        await client.process_commands(message)        
 
-    if not str(message.author.id) in ignore_list and not str(message.channel.id) in ignore_list and not "Restricted" in [role.name for role in message.author.roles]:
+    if not str(message.author.id) in ignore_list and not str(message.channel.id) in ignore_list and not "Restricted" in [role.name for role in message.author.roles] and not message.guild == None:
         if not message.author.id in cooldown:
             multiplier = db_query("varsity.db", "SELECT Level FROM Members WHERE UserID = 1")[0][0]
             pMultiplier = db_query("varsity.db", "SELECT expPersonalBoost FROM Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
@@ -1982,14 +1971,8 @@ Have fun!""", color=primary)
             await check_level_up(message.author.id, message.guild, message.channel)
             await asyncio.sleep(60)
             cooldown.remove(message.author.id)
-    
-        
-     
-                        
-
-    #except Exception as e:
-    #    await error("[500] %s" % (e), message.channel, message)
-
+  
+    '''Not sure if we will need to keep this about or not, if exp algorithms ever get changed or something breaks we'll need this'''
     #if message.content.upper() =="W!LEVELFIX":
     #    execute_query("varsity.db", "UPDATE Members SET Level = 1")
     #    for member in message.guild.members:
