@@ -619,48 +619,53 @@ async def buy(ctx):
 async def help(ctx):
     if await hasPerms(1, ctx):
         helpEm = discord.Embed(title="!help", description="Shows the list of commands", color=primary)
-        #helpEm.add_field(name=":tada: Event Commands", value="!buy <item>\n!donate <amount>", inline=False)
-        helpEm.add_field(name="<:member:486269178047627266> User Commands", value="!debug :new:\n!daily\n!coinflip <bet>\n!shop\n!profile [@user]\n!pay <@user> <amount>\n!ransack <@user> <amount>\n!ping\n!balance\n!tag <tag>\n!suggest <suggestion>\n!comment <suggestion-id> <comment>", inline=False)
         specialCommands = ""
-        lockedCommands = ""
         if await hasPerms(2, ctx, giveOutput=False):
             specialCommands = specialCommands + "!cookie <@user>\n"
             specialCommands = specialCommands + "!battle <@user>\n"
             specialCommands = specialCommands + "!train {stat}\n"
-        else:
-            lockedCommands = lockedCommands + "!cookie <@user> \n"
-            lockedCommands = lockedCommands + "!battle <@user> \n"
-            lockedCommands = lockedCommands + "!train {stat} \n"
         if await hasPerms(3, ctx, giveOutput=False):
             specialCommands = specialCommands + "!hug <@user>\n"
-            #specialCommands = specialCommands + "!marry <person>\n"
-        else:
-            lockedCommands = lockedCommands + "!hug <@user>\n"
-            #lockedCommands = lockedCommands + "!marry <person> **[:unlock: Level 20]**\n"
         if await hasPerms(4, ctx, giveOutput=False):
             specialCommands = specialCommands + "!fight <@user>\n"
-        else:
-            lockedCommands = lockedCommands + "!fight <@user>\n"
         if await hasPerms(5, ctx, giveOutput=False):
             specialCommands = specialCommands + "!slap <@user>\n"
-        else:
-            lockedCommands = lockedCommands + "!slap <@user>\n"
         if await hasPerms(6, ctx, giveOutput=False):
             specialCommands = specialCommands + "!embed {message}\n"
-        else:
-            lockedCommands = lockedCommands + "!embed {message}\n"
         if await hasPerms(16, ctx, giveOutput=False):
             specialCommands = specialCommands + "!kitten\n"
-        else:
-            lockedCommands = lockedCommands + "!kitten\n"
-        if not lockedCommands == "":
-            helpEm.add_field(name=":lock: Locked Commands", value=lockedCommands, inline=False)
-            
-        if "Uber Regular" in [role.name for role in ctx.message.author.roles] or "Moderators" in [role.name for role in ctx.message.author.roles]:     
-            helpEm.add_field(name=":unlock: Unlocked Commands", value=specialCommands, inline=False)       
-        if "Moderators" in [role.name for role in ctx.message.author.roles] or ctx.message.author.id in admin_bypass:
+        helpEm.add_field(name="<:member:486269178047627266> User Commands", value="!debug\n!daily\n!coinflip <bet>\n!shop\n!profile [@user]\n!pay <@user> <amount>\n!ransack <@user> <amount>\n!ping\n!balance\n!tag <tag>\n!suggest <suggestion>\n!comment <suggestion-id> <comment>\n" + specialCommands, inline=False)
+        if await hasPerms(32, ctx, giveOutput=False) or ctx.message.author.id in admin_bypass:
             helpEm.add_field(name="<:Staff:522185091187867668> Moderation Commands", value="!punish <@user> {reason}\n!suggestion <suggestion-id> <attribute> <value>\n!enable <command>\n!disable <command>\n!badge <add|remove> <emoji> <@user>\n!statmod <@user> <set|add|sub> <balance|exp|statwipe> {amount}\n!announce <type> <message>\n!raffle <minutes> <item>\n!giveitem <@user> <item> <amount>", inline=False)
         await ctx.message.channel.send(embed=helpEm)
+
+#!rewards
+@Bot.command(client, aliases=["levels"])
+async def rewards(ctx):
+    '''
+    Show rewards that can be unlocked from levelling up.
+
+    Required Permission Level: @Regular
+    '''
+    levelRewards = """**Level 10**
+!cookie
+!battle
+!train
+
+**Level 20**
+!hug
+
+**Level 30**
+!fight
+
+**Level 40**
+!slap
+
+**Level 50**
+!embed"""
+
+    embed=discord.Embed(title="Level Rewards", description=levelRewards, colour=primary)
+    await ctx.send(embed=embed)
 
 #!profile
 @Bot.command(client)
@@ -755,7 +760,6 @@ async def profile(ctx):
         em.set_thumbnail(url=user.avatar_url)
         em.add_field(name="_ _ _ _", value="_ _ _ _")
         em.add_field(name="Level", value=str(profile[1])+" [**" + str(exp) + "/" + str(expCost)+"**]")
-        #em.add_field(name="Tier", value=profile[2])
         em.add_field(name="Experience", value=str(profile[2])+ " [**#" + str(lpos) + "**]")
 
         em.add_field(name="Member Since", value=str(user.joined_at)[0:19])
@@ -859,7 +863,7 @@ async def ransack(ctx):
         else:
             execute_query("varsity.db", "UPDATE Members SET lastRansack = %s WHERE UserID=%s" % (str(otime), str(message.author.id)))
             chance = random.randint(1, int(round(amount/10000, 0)))
-            if chance == 1 or "ECDLSec Employee" in [role.name for role in message.author.roles]:
+            if chance == 1: #(Harry I see what you did there...)
                 add_coins(user, -amount)
                 add_coins(message.author, amount)
                 await message.channel.send(embed=discord.Embed(title="Ransack", description="Congrats! You successfully ransacked **%s** for **$%s**!\nYou may try again in 15 minutes." % (user.name, str(amount)), color=primary)) 
@@ -1806,21 +1810,7 @@ CEH = True
 
 @client.event
 async def on_message(message):
-    global CEH
-    
-    #while True:
-    #    await message.guild.edit(region=discord.VoiceRegion.london, afk_timeout=300)
-    #    await message.guild.edit(region=discord.VoiceRegion.russia, afk_timeout=300)
-    #    rate = random.randint(1,7)            
-    #    if rate == 1:        
-    #        await error("412 Precondition Failed: 'wss://gateway.discord.gg/?v=6' evaluated to false", message.channel)
-    #    #await message.guild.edit(vanity_code="varsity")
-
-    #return    
-             
-            
-    #await error("SQL_CONNECTION_REFUSED: sql.eu2.raptr.foggyio.uk unreachable", message.channel)
-    #return
+       
     mSplit = message.content.split()
     mList = []
     for word in mSplit:
@@ -1853,7 +1843,8 @@ async def on_message(message):
         await error("[423] This command is currently disabled", message.channel)
         return False
     channel = message.channel
-
+    
+    '''We'll keep this encase we want to enable it again for some random reason'''
     #for each in args:
     #    if each.upper()=="MAY":
     #        quote = random.choice(["The Government cannot just be consumed by Brexit. There is so much more to do", "My whole philosophy is about doing, not talking.", "I actually think I think better in high heels", "I've been clear that Brexit means Brexit", "I think we all agree that the comments Donald Trump made in relation to Muslims were divisive, unhelpful and wrong.", "There must be no attempts to remain inside the E.U., no attempts to rejoin it through the back door, and no second referendum.", "Strong and Stable leadership"])
@@ -1862,9 +1853,6 @@ async def on_message(message):
     if message.channel.id == gate:
         await message.delete()        
   
-    #elif message.content.upper().startswith("!RANSACK"):
-    #    await error("[501] Not Implemented", message.channel)
-
     elif message.content.upper().startswith("!ENTER"):
         global raffles
         global enteries
@@ -1940,9 +1928,7 @@ async def on_message(message):
                 execute_query("varsity.db", "UPDATE Members SET displayName = '%s' WHERE UserID = %s" % (member.name, str(member.id)))
             except:
                 pass
-            #await member.add_roles(discord.utils.get(member.guild.roles, name="-----===== Notif Roles =====-----"))
 
-    #return
     if message.channel.id in [473284192491536384, 483940602040549376]:
         hasMsg = db_query("varsity.db", "SELECT devMsg FROM Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
         if hasMsg == 0:
@@ -2014,27 +2000,12 @@ Have fun!""", color=primary)
             elif (bal/total_balance) * 100 > 15:
                 coins_add = coins_add * 0.75    
             add_coins(message.author, coins_add)
-            #add_coins_id(279714095480176642, int(round(coins_add*3, 0)))
             exp_add = int(random.randint(15, 25)*multiplier*pMultiplier)
             add_exp(message.author.id, exp_add)
-            #add_exp(279714095480176642, exp_add*3)
             await check_level_up(message.author.id, message.guild, message.channel)
             await asyncio.sleep(60)
             cooldown.remove(message.author.id)
-    #global isLooped
-    #if not isLooped:
-    #    isLooped = True
-    #    multiplier = db_query("varsity.db", "SELECT Level FROM Members WHERE UserID = 1")[0][0]
-    #    level = get_profile(279714095480176642)[1]
-    #    while True:
-    #        exp_add = int(random.randint(15, 25)*multiplier)
-    #        coins_add = random.randint(25,50)*level*multiplier
-    #        add_coins_id(279714095480176642, int(round(coins_add*3, 0)))
-    #        add_exp(279714095480176642, exp_add*1)
-    #        await asyncio.sleep(10)
-            
-
-
+    
         
      
                         
