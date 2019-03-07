@@ -1627,30 +1627,6 @@ async def giveall(ctx):
                 except:
                     await ctx.message.channel.send("Error occured for user %s" % (member))
 
-                
-@Bot.command(client)
-async def giveitem(ctx):
-    if await hasPerms(32, ctx):
-        args = ctx.message.content.split(" ")
-        member = discord.utils.get(ctx.message.guild.members, mention=args[1])
-        if args[2].upper() == "EXP":
-            amount = args[3]
-            if int(amount) < 0:
-                await error("Cannot Give Negative EXP!", ctx.message.channel)
-            else:    
-                add_exp(member.id, int(amount))
-                await ctx.message.channel.send(":ok_hand: Successfully given `%s` **%s EXP**!" % (member.name, amount))
-
-        elif args[2].upper() == "ELF-ROLE":
-            role = discord.utils.get(ctx.message.guild.roles, name="Christmas Elf")
-            await member.add_roles(role)
-            await ctx.message.channel.send(":ok_hand: Successfully given `%s` **Christmas Elf Role**!" % (member.name))
-
-        else:
-            item = " ".join(args[2:])
-            give_item(item, member)
-            await ctx.message.channel.send(":ok_hand: Successfully given `%s` **%s**!" % (member.name, item))
-
 @Bot.command(client)
 async def multiplier(ctx):
     if await hasPerms(32, ctx):
