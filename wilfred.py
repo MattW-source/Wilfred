@@ -875,25 +875,6 @@ async def tag(ctx):
 
     If you are caught doing this and we feel it is best if you didn't type in help channels, we'll revoke your permissions to use them.''', color=0xffd343)
             await message.channel.send(embed=em)
-            
-#!suggest
-@Bot.command(client)
-async def suggest(ctx):
-    if await hasPerms(2, ctx):
-        message = ctx.message
-        args = message.content.split(" ")
-        if len(args) <= 1:
-            await error("Invalid Command Usage - Not enough args", ctx.message.channel)
-            return
-        em = discord.Embed(title="Suggestion", description="Created by %s" % (message.author.name), color=reds)
-        em.add_field(name="Status", value="Pending")
-        em.add_field(name="Assigned To", value="None")
-        em.add_field(name="Content", value=" ".join(args[1:]))
-        suggestion = await client.get_channel(483767654914588683).send(embed=em)
-        em.set_footer(text="Suggestion ID: %s" % (str(suggestion.id)))
-        await suggestion.edit(embed=em)
-        await message.channel.send(content="Suggestion Submitted", embed=suggestion.embeds[0])
-        await message.delete()
 
 #!items
 @Bot.command(client)
@@ -1086,7 +1067,7 @@ Please type your new nickname below or type "cancel" to exit.""", color=primary)
                 if "Moderators" in [role.name for role in message.author.roles]:
                     await message.channel.send(e)
             
-#!hug
+#!slap
 @Bot.command(client)
 async def slap(ctx):
     if await hasPerms(5, ctx):
@@ -1220,6 +1201,7 @@ async def battle(ctx):
                 pass
         battleInProgress = False
 
+#!embed
 @Bot.command(client)
 async def embed(ctx):
     if await hasPerms(6, ctx):
@@ -1230,6 +1212,7 @@ async def embed(ctx):
         em.set_author(name=author.name, icon_url=author.avatar_url)
         await ctx.send(embed=em)
 
+#!kitten
 @Bot.command(client)
 async def kitten(ctx):
     if await hasPerms(16, ctx):
@@ -1238,6 +1221,7 @@ async def kitten(ctx):
         em.set_image(url=imgUrl)
         await ctx.send(embed=em)
     
+#!kitten
 @Bot.command(client)
 async def train(ctx):
     if await hasPerms(2, ctx):
@@ -1412,7 +1396,7 @@ async def enable(ctx, *args):
             execute_query("varsity.db", "DELETE FROM disabledCommands WHERE command = '%s'" % (command)) 
             await ctx.send(":ok_hand: Successfully enabled `%s`" % command)
         
-
+#!statmod
 @Bot.command(client)
 async def statmod(ctx, *args):
     '''
@@ -1522,6 +1506,7 @@ async def statmod(ctx, *args):
                 em.add_field(name="statHp", value=str(profile[9]))
                 await message.channel.send(embed=em)
          
+#!announce
 @Bot.command(client)
 async def announce(ctx):
     if await hasPerms(32, ctx):
@@ -1541,7 +1526,7 @@ async def announce(ctx):
             await client.get_channel(523991937200422933).send("%s\n%s\n_ _\nSent By: **%s**" % (role.mention, announcement, str(ctx.message.author)))
             await role.edit(mentionable=False)            
             
-
+#!raffle
 @Bot.command(client)
 async def raffle(ctx):
     if await hasPerms(16, ctx):
@@ -1560,6 +1545,7 @@ async def raffle(ctx):
         await ctx.message.channel.send(embed=em)
         enteries.clear()
 
+#!giveall
 @Bot.command(client)
 async def giveall(ctx):
     if await hasPerms(32, ctx):
@@ -1572,6 +1558,7 @@ async def giveall(ctx):
                 except:
                     await ctx.message.channel.send("Error occured for user %s" % (member))
 
+#!multiplier                    
 @Bot.command(client)
 async def multiplier(ctx):
     if await hasPerms(32, ctx):
@@ -1580,6 +1567,7 @@ async def multiplier(ctx):
         level_up(1, multiplier)
         await ctx.message.channel.send(":ok_hand:, Successfully set exp multiplier to %s" % (args[1]))
 
+#!comment        
 @Bot.command(client)
 async def comment(ctx):
     if await hasPerms(2, ctx):
@@ -1593,8 +1581,28 @@ async def comment(ctx):
         await suggestion.edit(embed=embed)
         await message.channel.send(":ok_hand:, Applied your comment to suggestion **%s**." % (args[1]))
         await ctx.message.delete()
+        
+        
+#!suggest
+@Bot.command(client)
+async def suggest(ctx):
+    if await hasPerms(2, ctx):
+        message = ctx.message
+        args = message.content.split(" ")
+        if len(args) <= 1:
+            await error("Invalid Command Usage - Not enough args", ctx.message.channel)
+            return
+        em = discord.Embed(title="Suggestion", description="Created by %s" % (message.author.name), color=reds)
+        em.add_field(name="Status", value="Pending")
+        em.add_field(name="Assigned To", value="None")
+        em.add_field(name="Content", value=" ".join(args[1:]))
+        suggestion = await client.get_channel(483767654914588683).send(embed=em)
+        em.set_footer(text="Suggestion ID: %s" % (str(suggestion.id)))
+        await suggestion.edit(embed=em)
+        await message.channel.send(content="Suggestion Submitted", embed=suggestion.embeds[0])
+        await message.delete()
 
-
+#!suggestion
 @Bot.command(client)
 async def suggestion(ctx):
     if await hasPerms(32, ctx):
