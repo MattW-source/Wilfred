@@ -9,13 +9,13 @@ import _thread as thread
 import random
 
 token = ""
-buildVersion = "060319.In-Dev"
+buildVersion = "090319.r1"
 
 #from secrets import * #Token will be stored in here so I don't accidentally leak the admin token for my Discord again...
 
 #color schemes
-primary = 0x55FF55
-secondary = 0x04bfbf
+primary =  0xFF5555 #0x55FF55
+secondary = 0xFF5555 #0x04bfbf
 reds = 0xf93b3b
 
 
@@ -47,8 +47,8 @@ client.remove_command("help")
 #"/home/pi/varsity-discord/"+
 
 def execute_query(table, query):
-    conn = sqlite3.connect("/home/rsa-key-20190102/"+table)
-    #conn = sqlite3.connect(table)
+    #conn = sqlite3.connect("/home/rsa-key-20190102/"+table)
+    conn = sqlite3.connect(table)
     c = conn.cursor()
     c.execute(query)
     conn.commit()
@@ -56,8 +56,8 @@ def execute_query(table, query):
     conn.close()
 
 def db_query(table, query):
-    conn = sqlite3.connect("/home/rsa-key-20190102/"+table)
-    #conn = sqlite3.connect(table)
+    #conn = sqlite3.connect("/home/rsa-key-20190102/"+table)
+    conn = sqlite3.connect(table)
     c = conn.cursor()
     c.execute(query)
     result = c.fetchall()
@@ -170,13 +170,13 @@ def insert_db_user(member):
         pass
         
 def give_item(item, member):
-    execute_query("varsity.db", "INSERT INTO items (belongsTo, itemName) VALUES (%s, '%s')" % (str(member.id), str(item)))
+    execute_query("varsity.db", "INSERT INTO items (belongsTo, itemName) VALUES (%s, '%s')" % (str(member.id), str(item.upper())))
 
 def get_items(member):
     return db_query("varsity.db", "SELECT itemName FROM items WHERE belongsTo = %s" % (str(member.id)))
 
 def remove_item(item, member):
-    firstItemId = db_query("varsity.db", "SELECT itemId FROM items WHERE belongsTo = %s AND itemName = '%s'" % (str(member.id), str(item)))[0][0]
+    firstItemId = db_query("varsity.db", "SELECT itemId FROM items WHERE belongsTo = %s AND itemName = '%s'" % (str(member.id), str(item.upper())))[0][0]
     execute_query("varsity.db", "DELETE FROM items WHERE itemId = %s" % (str(firstItemId))) #So that only one is removed, users can have multiple of the same item so we can't do it off item name.
     
 def balance_formatter(balance):
@@ -811,11 +811,11 @@ async def notify(ctx):
     Required Arguments: Notifications 
 
     '''
-    if hasPerms(1, ctx):
+    if await hasPerms(1, ctx):
         message = ctx.message
         args = ctx.message.content.split()
         if len(args) == 1:
-            await ctx.send("You can choose to join/leave the following notification groups:\nWindows\nApple\Android\Tech\Server\Wilfred") 
+            await ctx.send("You can choose to join/leave the following notification groups:\nWindows\nApple\nAndroid\nTech\nServer\nWilfred") 
         elif args[1].upper() == "WINDOWS":
             role = discord.utils.get(message.guild.roles, name="Windows Insiders")
             if not role.name in [r.name for r in message.author.roles]:
@@ -1004,21 +1004,22 @@ async def items(ctx):
         items = get_items(ctx.message.author)
         if len(args) == 1:
             em = discord.Embed(title="Items", description="You currently have the following items:", color=secondary)
-            if items[0][0] is None or len(items[0][0]) == 0:
+            if len(items) == 0:
                 em.add_field(name="No Items", value="We couldn't find any items for you.")
             else:
                 itemStr = ""
                 for each in items: 
-                    itemStr = each[0] + "\n"
+                    itemStr = each[0].capitalize() + "\n"
                 em.add_field(name="Items", value=itemStr)
             em.set_footer(text="Use !items use <item> to use an item")    
             await ctx.message.channel.send(embed=em)
         elif args[1].upper() == "USE":
             itemArray = []
+            item = " ".join(args[2:])
             for each in items:
-                itemArray.append(each.upper())
+                itemArray.append(each[0].upper())
             if not item.upper() in itemArray:
-                await ctx.message.channel("You do not have this item")
+                await ctx.send("You do not have this item")
                 return
             if item.upper() == "MAGICAL RANSACK KEY":
                 """
@@ -1762,7 +1763,8 @@ async def multiplier(ctx):
     if await hasPerms(32, ctx):
         args = ctx.message.content.split(" ")
         multiplier = int(args[1])
-        level_up(1, multiplier)
+        timer = int(args[2])
+        add_booster(1, 2, time.time()+timer)
         await ctx.message.channel.send(":ok_hand:, Successfully set exp multiplier to %s" % (args[1]))
 
 @Bot.command(client)
@@ -1823,6 +1825,7 @@ async def on_ready():
         return
     loop = True
     while True:
+        execute_query("varsity.db", "UPDATE boosters SET isActive=0 WHERE expires < %s" % (str(time.time())))
         try:
             leaderboard = db_query("varsity.db", "SELECT UserID, Level, expTotal FROM Members WHERE NOT UserID = 472063067014823938 AND NOT UserID = 1 ORDER BY expTotal DESC")
             index=0
@@ -1904,10 +1907,12 @@ async def on_message(message):
     if args[0] in ["?playing", "?play", "?next", "?skip", "?playlist", "?register", "?volume", "?say"]:
         if await hasPerms(16, message):
             pass
-        
+    disabled = False    
+    command = args[0].replace("'", "")   
     disabledCommands = db_query("varsity.db", "SELECT command FROM disabledCommands WHERE command = '%s'" % (command))
     if len(disabledCommands) > 0:
         await error("[423] This command is currently disabled", message.channel)
+        disabled = True
     else:
         channel = message.channel
         
@@ -1975,7 +1980,7 @@ Have fun!""", color=primary)
 
             await message.channel.send(embed=em)
 
-    if not "Restricted" in [role.name for role in message.author.roles]:
+    if not "Restricted" in [role.name for role in message.author.roles] and not disabled:
         await client.process_commands(message)        
 
     if not str(message.author.id) in ignore_list and not str(message.channel.id) in ignore_list and not "Restricted" in [role.name for role in message.author.roles] and not message.guild == None:
