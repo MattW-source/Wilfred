@@ -167,11 +167,7 @@ def insert_db_user(member):
     try:
         execute_query("varsity.db", "INSERT INTO Members (UserID) VALUES ('%s')" % (member.id))
     except:
-        cwarn("User already exists in Database")
-        try:
-            cinfo(member.name)
-        except:
-            pass
+        pass
         
 def give_item(item, member):
     execute_query("varsity.db", "INSERT INTO items (belongsTo, itemName) VALUES (%s, '%s')" % (str(member.id), str(item)))
@@ -1755,6 +1751,11 @@ async def on_ready():
     activity=discord.Game(name="Wilfred %s" % (str(buildVersion)))
     await client.change_presence(activity=activity)
     channel = client.get_channel(521326677960294400)
+    for member in channel.guild.members:
+        try:
+            insert_db_user(member)
+        except:
+            pass
     LBoardExp = await channel.get_message(521326939529805845)
     LBoardBal = await channel.get_message(521326947150856235)
     if Loop:
@@ -1932,13 +1933,6 @@ async def on_message(message):
                 message.content = contents
                 message.author = target
                 message.channel = channel
-       
-        elif message.content.upper().startswith("W!UPDATE"):
-            for member in message.guild.members:
-                try:
-                    insert_db_user(member)
-                except:
-                    pass
 
     if message.channel.id in [473284192491536384, 483940602040549376]:
         hasMsg = db_query("varsity.db", "SELECT devMsg FROM Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
