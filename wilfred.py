@@ -11,7 +11,7 @@ import random
 token = ""
 buildVersion = "060319.In-Dev"
 
-from secrets import * #Token will be stored in here so I don't accidentally leak the admin token for my Discord again...
+#from secrets import * #Token will be stored in here so I don't accidentally leak the admin token for my Discord again...
 
 #color schemes
 primary = 0x55FF55
@@ -84,8 +84,6 @@ async def error(reason, channel, details=None):
 async def warn(reason, channel, details=None):
     em = discord.Embed(title="Warning", description="The command produced the following warning: `%s`" % reason, colour=reds)
     msg = await channel.send(embed=em)
-
-#<@&511270956983910401>
 
 #-----Permissions-----
 async def hasPerms(level, ctx, *, giveOutput = True):
@@ -353,12 +351,24 @@ def time_phaser(seconds):
 #!accept
 @Bot.command(client)
 async def accept(ctx):
+    '''
+    Accept the server rules
+
+    Required Permission: @everyone
+    
+    '''
     if ctx.message.channel.id == gate:
         await user_accept_rules(ctx.message.author)
 
 #!decline
 @Bot.command(client)
 async def deny(ctx):
+    '''
+    Decline the server rules
+
+    Required Permission: @everyone
+    
+    '''
     if ctx.message.channel.id == gate:
         await ctx.message.author.kick()
 
@@ -367,6 +377,12 @@ async def deny(ctx):
 #!daily
 @Bot.command(client)
 async def daily(ctx):
+    '''
+    Open your daily reward
+
+    Required Permission: @Regular
+
+    '''
     if await hasPerms(1, ctx):
 
         message = ctx.message
@@ -530,6 +546,12 @@ async def daily(ctx):
 #!shop
 @Bot.command(client)
 async def shop(ctx):
+    '''
+    View Buyable Items
+
+    Required Permission: @Regular
+    
+    '''
     if await hasPerms(1, ctx):
         message = ctx.message
         em = discord.Embed(title="Shop", description="The following items are currently available for purchase:", color=reds)
@@ -539,11 +561,17 @@ async def shop(ctx):
         em.add_field(name="4) 24 Hour 2* Personal Multiplier [$2m]", value="Boost your exp by 2 for 24 hours. Activates immeidately after purchase")
         em.add_field(name="5) 1 Hour 3* Personal Multiplier [$2m]", value="Boost your exp by 3 for 1 hour. Activates immediately after purchase")
         em.add_field(name="6) 1 Hour 2* Global Multiplier [$500k]", value="Boost the exp earned for everyone in the whole server for 1 hour. Activates immediately after purchase")
-        #em.set_footer(text="PURCHASING COMING SOON - PRICES SUBJECT TO CHANGE") 
         await message.channel.send(embed=em)
 
 @Bot.command(client)
 async def buy(ctx):
+    '''
+    Buy an Item
+
+    Required Permission: @Regular
+    Reguired Arguments: Item ID
+
+    '''
     if await hasPerms(1, ctx):
         message = ctx.message
         args = message.content.split()
@@ -604,27 +632,31 @@ async def buy(ctx):
 #!help
 @Bot.command(client)
 async def help(ctx):
-    if await hasPerms(1, ctx):
-        helpEm = discord.Embed(title="!help", description="Shows the list of commands", color=primary)
-        specialCommands = ""
-        if await hasPerms(2, ctx, giveOutput=False):
-            specialCommands = specialCommands + "!cookie <@user>\n"
-            specialCommands = specialCommands + "!battle <@user>\n"
-            specialCommands = specialCommands + "!train {stat}\n"
-        if await hasPerms(3, ctx, giveOutput=False):
-            specialCommands = specialCommands + "!hug <@user>\n"
-        if await hasPerms(4, ctx, giveOutput=False):
-            specialCommands = specialCommands + "!fight <@user>\n"
-        if await hasPerms(5, ctx, giveOutput=False):
-            specialCommands = specialCommands + "!slap <@user>\n"
-        if await hasPerms(6, ctx, giveOutput=False):
-            specialCommands = specialCommands + "!embed {message}\n"
-        if await hasPerms(16, ctx, giveOutput=False):
-            specialCommands = specialCommands + "!kitten\n"
-        helpEm.add_field(name="<:member:486269178047627266> User Commands", value="!debug\n!daily\n!coinflip <bet>\n!shop\n!profile [@user]\n!pay <@user> <amount>\n!ransack <@user> <amount>\n!ping\n!balance\n!tag <tag>\n!suggest <suggestion>\n!comment <suggestion-id> <comment>\n" + specialCommands, inline=False)
-        if await hasPerms(32, ctx, giveOutput=False) or ctx.message.author.id in admin_bypass:
-            helpEm.add_field(name="<:Staff:522185091187867668> Moderation Commands", value="!punish <@user> {reason}\n!suggestion <suggestion-id> <attribute> <value>\n!enable <command>\n!disable <command>\n!badge <add|remove> <emoji> <@user>\n!statmod <@user> <set|add|sub> <balance|exp|statwipe> {amount}\n!announce <type> <message>\n!raffle <minutes> <item>\n!giveitem <@user> <item> <amount>", inline=False)
-        await ctx.message.channel.send(embed=helpEm)
+    '''
+    Show the commands you can use.
+
+    Required Permission Level: @everyone
+    '''
+    helpEm = discord.Embed(title="!help", description="Shows the list of commands", color=primary)
+    specialCommands = ""
+    if await hasPerms(2, ctx, giveOutput=False):
+        specialCommands = specialCommands + "!cookie <@user>\n"
+        specialCommands = specialCommands + "!battle <@user>\n"
+        specialCommands = specialCommands + "!train {stat}\n"
+    if await hasPerms(3, ctx, giveOutput=False):
+        specialCommands = specialCommands + "!hug <@user>\n"
+    if await hasPerms(4, ctx, giveOutput=False):
+        specialCommands = specialCommands + "!fight <@user>\n"
+    if await hasPerms(5, ctx, giveOutput=False):
+        specialCommands = specialCommands + "!slap <@user>\n"
+    if await hasPerms(6, ctx, giveOutput=False):
+        specialCommands = specialCommands + "!embed {message}\n"
+    if await hasPerms(16, ctx, giveOutput=False):
+        specialCommands = specialCommands + "!kitten\n"
+    helpEm.add_field(name="<:member:486269178047627266> User Commands", value="!debug\n!daily\n!coinflip <bet>\n!shop\n!profile [@user]\n!pay <@user> <amount>\n!ransack <@user> <amount>\n!ping\n!balance\n!tag <tag>\n!suggest <suggestion>\n!comment <suggestion-id> <comment>\n" + specialCommands, inline=False)
+    if await hasPerms(32, ctx, giveOutput=False) or ctx.message.author.id in admin_bypass:
+        helpEm.add_field(name="<:Staff:522185091187867668> Moderation Commands", value="!punish <@user> {reason}\n!suggestion <suggestion-id> <attribute> <value>\n!enable <command>\n!disable <command>\n!badge <add|remove> <emoji> <@user>\n!statmod <@user> <set|add|sub> <balance|exp|statwipe> {amount}\n!announce <type> <message>\n!raffle <minutes> <item>\n!giveitem <@user> <item> <amount>", inline=False)
+    await ctx.message.channel.send(embed=helpEm)
 
 #!rewards
 @Bot.command(client, aliases=["levels"])
@@ -632,23 +664,29 @@ async def rewards(ctx):
     '''
     Show rewards that can be unlocked from levelling up.
 
-    Required Permission Level: @Regular
+    Required Permission Level: @everyone
     '''
     levelRewards = """**Level 10**
+<@&515995454274535455>
 !cookie
 !battle
 !train
+!tag
 
 **Level 20**
+<@&515995453632806928>
 !hug
 
 **Level 30**
+<@&515995451518877697>
 !fight
 
 **Level 40**
+<@&515995448918540358>
 !slap
 
 **Level 50**
+<@&515995445537931275>
 !embed"""
 
     embed=discord.Embed(title="Level Rewards", description=levelRewards, colour=primary)
@@ -657,14 +695,19 @@ async def rewards(ctx):
 #!profile
 @Bot.command(client)
 async def profile(ctx):
+    '''
+    View your profile or someone elses profile.
+
+    Required Permission: @Regular
+    Optional Arguments: Mention
+
+    '''
     if await hasPerms(1, ctx):
         message = ctx.message
         args = message.content.split()
-        
         if len(args) <= 1:
             user = message.author
             profile = get_profile(str(message.author.id))
-            
         else:
             if args[1].upper() == "OPTIONS":
                 if len(args) == 2:
@@ -674,8 +717,6 @@ async def profile(ctx):
                     pictures = "- `default`\n"
                     if not cosmetics is None:
                         cosmetics = cosmetics.split("_")
-                        
-
                         for item in cosmetics:
                             itemName = "".join(item[1:]) 
                             if item[0] == "c":
@@ -700,7 +741,6 @@ async def profile(ctx):
                         await message.channel.send("**Successfully Updated Profile Colour!**")
                     else:
                         await message.channel.send("Error: **You have not unlocked this colour**")
-
                 elif args[2].upper() == "HASHTAG":
                     cosmetics = db_query("varsity.db", "SELECT cosmetics FROM Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
                     sCosmetics = cosmetics.split("_")
@@ -717,7 +757,6 @@ async def profile(ctx):
                     await error("[418] I'm a teapot", message.channel)
                     return
         em = discord.Embed(title=user.name, colour=eval(profile[4]))
-
         exps = db_query("varsity.db", "SELECT UserID FROM Members WHERE NOT UserID = 472063067014823938 AND NOT UserID = 1 ORDER BY expTotal DESC")
         lpos = 1
         for userl in exps:
@@ -725,7 +764,6 @@ async def profile(ctx):
                 lpos = lpos + 1
             else:
                 break
-
         bals = db_query("varsity.db", "SELECT UserID FROM Members WHERE NOT UserID = 472063067014823938 AND NOT UserID = 1 ORDER BY Balance DESC")
         bpos = 1
         for userb in bals:
@@ -733,32 +771,31 @@ async def profile(ctx):
                 bpos = bpos + 1
             else:
                 break        
-        
-
         rank = get_rank(user)
         em.set_author(name=rank[0], icon_url=rank[1])
-
         badges = profile[3]
-
         exp = profile[6]
         expCost = 5 * (profile[1]*profile[1]) + 50 * profile[1] + 100 
-
         em.add_field(name=badges, value="_ _ _ _ ")
         em.set_thumbnail(url=user.avatar_url)
         em.add_field(name="_ _ _ _", value="_ _ _ _")
         em.add_field(name="Level", value=str(profile[1])+" [**" + str(exp) + "/" + str(expCost)+"**]")
         em.add_field(name="Experience", value=str(profile[2])+ " [**#" + str(lpos) + "**]")
-
         em.add_field(name="Member Since", value=str(user.joined_at)[0:19])
         em.add_field(name="Balance", value="$"+str(balance_formatter(int(profile[0])))+" [**#%s**]" % (str(bpos)))
         if not profile[5] is None:    
             em.set_footer(text="#"+profile[5])
-
         await message.channel.send(embed=em)
         
-        
+#!bal        
 @Bot.command(client, aliases=["bal"])
 async def balance(ctx):
+    '''
+    View your balance
+
+    Required Permission: @Regular
+    
+    '''
     if await hasPerms(1, ctx):
         profile = get_profile(str(ctx.message.author.id))
         uBalance = profile[0]
@@ -774,6 +811,13 @@ async def balance(ctx):
 #!pay
 @Bot.command(client)
 async def pay(ctx):
+    '''
+    Pay Someone
+
+    Required Permission: @Regular
+    Reguired Arguments: Mention, Amount
+
+    '''
     if await hasPerms(1, ctx):
         message = ctx.message
         args = message.content.split()
@@ -787,13 +831,10 @@ async def pay(ctx):
                 return False
             else:
                 amount = args[2]
-                
             em = discord.Embed(title="Transaction", description="Please confirm your payment of $%s to %s **Y/N**" % (str(amount), str(user.mention)), colour=primary)
             await message.channel.send(embed=em)
-
             def check(m):
                 return m.author.id == message.author.id
-
             try:
                 msg = await client.wait_for('message', check=check, timeout=30.0)
             except asyncio.TimeoutError:
@@ -807,16 +848,20 @@ async def pay(ctx):
                         await message.channel.send("Transaction Declined")
                 else:
                     await message.channel.send("Invalid Response - Transaction Cancelled")
-
             
 #!ransack
 @Bot.command(client)
 async def ransack(ctx):
+    '''
+    Ransack Someone
+
+    Required Permission: @Regular
+    Reguired Arguments: Mention, Amount
+
+    '''
     if await hasPerms(1, ctx):
         message = ctx.message
-
         otime = int(time.time())
-
         timeLast = db_query("varsity.db", "SELECT lastRansack FROM Members WHERE UserID=%s" % (str(message.author.id)))[0][0]
         timeNew = timeLast + (3600*0.25)
 
@@ -850,7 +895,7 @@ async def ransack(ctx):
         else:
             execute_query("varsity.db", "UPDATE Members SET lastRansack = %s WHERE UserID=%s" % (str(otime), str(message.author.id)))
             chance = random.randint(1, int(round(amount/10000, 0)))
-            if chance == 1: #(Harry I see what you did there...)
+            if chance == 1:
                 add_coins(user, -amount)
                 add_coins(message.author, amount)
                 await message.channel.send(embed=discord.Embed(title="Ransack", description="Congrats! You successfully ransacked **%s** for **$%s**!\nYou may try again in 15 minutes." % (user.name, str(amount)), color=primary)) 
@@ -861,44 +906,16 @@ async def ransack(ctx):
                 await message.channel.send(embed=discord.Embed(title="Ransack", description="You failed to ransack **%s** and were fined **$%s** for your attempt!\nYou may try again in 15 minutes." % (user.name, str(amount)), color=0xFF5555))
                 add_coins(user, int(round(amount/2, 0)))
 
-
-
-#!tag
-@Bot.command(client)
-async def tag(ctx):
-    if await hasPerms(2, ctx):
-        message = ctx.message
-        args = message.content.split()
-        if len(args) <= 1:
-            await error("Invalid Command Usage - Not enough args", ctx.message.channel)
-            return
-        if args[1].upper().startswith("TOKEN"):
-            em = discord.Embed(title="Tokens", description='''**__DO NOT SHARE YOUR TOKEN!__** Doing so may result in your bot being hacked. We don't take responsibility for your bot being hacked. If for some reason you do leak it, immediately change it as it will automatically invalidate the previous token.''', color=0xffd343)
-            await message.channel.send(embed=em)
-        elif args[1].upper().startswith("PING"):
-            em = discord.Embed(title="Ping Pong", description='''Don't ping or DM Members for help with your script. Just ask it in the correct help channel, and someone will see it eventually. Also, please refrain from pinging the @Staff role, as some staff members do not code, and would rather not be pinged for this type of stuff.''', color=0xffd343)
-            await message.channel.send(embed=em)
-        elif args[1].upper().startswith("PYTHON"):
-            em = discord.Embed(title="Python Downloads and Docs", description='''**Python 3.6.5 Download:** https://www.python.org/downloads/release/python-365/
-    **Python 3.7 Download:** https://www.python.org/downloads/release/python-370/
-    **Python 3 Documentation:** https://docs.python.org/3/
-    ''', color=0xffd343)
-            await message.channel.send(embed=em)
-        elif args[1].upper().startswith("QUESTION"):
-            em = discord.Embed(title="Asking Questions", description='''Please don't post one message saying "Help something don't work" and wait for a response. Most people prefer to judge whether the issue is in their grasp or something they can handle in the time they've got. To allow us to help you, please provide as much information as possible when posting your issue, for example - What the error is, error logs and your code with sensitive information removed. (Please use code blocks for these thing)''', color=0xffd343)
-            await message.channel.send(embed=em)
-        elif args[1].upper().startswith("ANSWERING"):
-            em = discord.Embed(title="Answering Questions", description='''Please only answer questions that you actually know the answer to, don't respond with things that you guess are correct, it doesn't help anyone. Please don't contradict someone's answer with what you believe is the "better" way of doing something, it confuses everyone. Just don't do it.
-
-    Also, We've seen some smartass answers and argument over whose way is better and it's annoying and not helpful.
-
-    If you are caught doing this and we feel it is best if you didn't type in help channels, we'll revoke your permissions to use them.''', color=0xffd343)
-            await message.channel.send(embed=em)
-            
-    
 #!suggest
 @Bot.command(client)
 async def suggest(ctx):
+    '''
+    Make a suggestion
+
+    Required Permission: @Uber Regular
+    Reguired Arguments: Suggestion Content
+
+    '''
     if await hasPerms(2, ctx):
         message = ctx.message
         args = message.content.split(" ")
@@ -918,13 +935,18 @@ async def suggest(ctx):
 #!items
 @Bot.command(client)
 async def items(ctx):
+    '''
+    View or use your items
+
+    Required Permission: @Regular
+    Optional Arguments: use <item>
+
+    '''
     if await hasPerms(1, ctx):
         args = ctx.message.content.split(" ")
         items = get_items(ctx.message.author)
         if len(args) == 1:
-
             em = discord.Embed(title="Items", description="You currently have the following items:", color=secondary)
-
             if items[0][0] is None or len(items[0][0]) == 0:
                 em.add_field(name="No Items", value="We couldn't find any items for you.")
             else:
@@ -938,7 +960,6 @@ async def items(ctx):
             itemArray = []
             for each in items:
                 itemArray.append(each.upper())
-                 
             if not item.upper() in itemArray:
                 await ctx.message.channel("You do not have this item")
                 return
@@ -947,7 +968,6 @@ async def items(ctx):
                 This Key Will Allow The User To Ransack 25% Of A Users Balance Without Fail
                 """
                 await ctx.message.channel.send("Please tag the user you would like to ransack or type 'N' to exit")
-
                 def check(m):
                     return m.author == ctx.message.author
                 try:
@@ -998,30 +1018,16 @@ async def items(ctx):
                             remove_item("MYTHICAL RANSACK KEY", ctx.message.author)
             else:
                 ctx.message.channel.send("Invalid Item")
-                            
-
-                
-        
-        
-@Bot.command(client)
-async def ban(ctx):
-    if await hasPerms(3, ctx):
-        if fetch_coins(ctx.message.author) >= 15000 or "Moderators" in [role.name for role in ctx.message.author.roles]:
-            args = ctx.message.content.split(" ")
-            target = discord.utils.get(ctx.message.guild.members, mention=args[1])
-            issuer = ctx.message.author
-            reason = " ".join(args[2:])
-            em = discord.Embed(title="Punish", description="**%s** has banned **%s** for **9001 Days** for `%s`" % (issuer.name, target.name, reason), color=primary)
-            await ctx.send(embed=em)
-            if not "Moderators" in [role.name for role in ctx.message.author.roles]:
-                add_coins(ctx.message.author, -15000)
     
-
-#--Connection Commands--
-
 #!ping
 @Bot.command(client)
 async def ping(ctx):
+    '''
+    Get the bots ping
+
+    Required Permission: @Regular
+
+    '''
     if await hasPerms(1, ctx):
         chance = random.randint(1,25)
         if chance == 1:
@@ -1033,40 +1039,182 @@ async def ping(ctx):
         end = time.time() * 1000
         await msg.edit(content=pongStr + " `%sms`" % (str(int(round(end-start, 0))))+" **[SUBSCRIBE TO __PEWDIEPIE__]**")
 
+#--Level Commands--
 
 @Bot.command(client)
-async def debug(ctx):
-    if await hasPerms(1, ctx):
-        em = discord.Embed(title="Debug", description="Debug Information", color=reds)
-        em.add_field(name="Latency", value="`Pinging...`")
-        em.add_field(name="Requests Per Second", value="`%s`" % (str(random.randint(1,3))+"."+ str(random.randint(1,9))))
-        em.add_field(name="DB Queue Length", value="`%s`" % (str(random.randint(21,173)))) 
-        em.add_field(name="Error Logs", value="```Unable to reach logging server...```") #Logging server borked
-        start = time.time()*1000
-        msg = await ctx.message.channel.send(embed=em)
-        end = time.time()*1000
-        ping = int(round(end - start, 0))
-        nEm = msg.embeds[0].set_field_at(0, name="Latency", value="`%sms`" % (str(ping)))
-        await msg.edit(embed=nEm)
-    
-    
-                 
-    
+async def train(ctx):
+    '''
+    Upgrade your stats at a cost
 
-#--Level Commands--
+    Required Permission: @Uber Regular
+    Optional Arguments: Stat Name
+
+    '''
+    if await hasPerms(2, ctx):
+        global training
+        message = ctx.message
+        args = message.content.split()
+        user = message.author
+        userStats = db_query("varsity.db", "SELECT statAtk, statDef, statHp FROM Members WHERE UserID = %s" % (str(user.id)))[0]
+        if message.author.id in training:
+            await error("Please react to previous confirmation box before preforming this action again", message.channel)
+            return
+        training.append(message.author.id)
+        if len(args) == 1:
+            em=discord.Embed(title="Stats", description="`Attack: %s` **[Upgrade Cost: `$%s`]**\n`Defense: %s` **[Upgrade Cost: `$%s`]**\n`HP: %s` **[Upgrade Cost: `$%s`]**" % (str(userStats[0]), str(userStats[0]*1000), str(userStats[1]), str(userStats[1]*1000), str(userStats[2]), str(userStats[2]*1000)), color=primary)
+            await message.channel.send(embed=em)
+        elif args[1].upper() == "ATTACK":
+            if not fetch_coins(user) >= userStats[0]*1000:
+                await message.channel.send("Insufficient Funds")
+            elif userStats[0] >= 300:
+                await message.channel.send("Cannot Upgrade Past 300")
+            else:    
+                em=discord.Embed(tile="Train", description="Train **Attack** `%s` **---->** `%s` for **$%s**?\nThis transaction cannot be reversed!" % (str(userStats[0]), str(userStats[0]+5), str(userStats[0]*1000)), color=primary)
+                confirmation = await message.channel.send(embed=em)
+                await confirmation.add_reaction("\U0001F44D")
+                await confirmation.add_reaction("\U0001F44E")
+                def check(reaction, user):
+                    return user == message.author and (str(reaction.emoji) == '\U0001F44D' or str(reaction.emoji) == "\U0001F44E")
+                try:
+                    reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
+                except asyncio.TimeoutError:
+                    await message.channel.send('Timed Out')
+                else:
+                    if str(reaction.emoji) == "\U0001F44D":
+                        attackNew = userStats[0] + 5
+                        execute_query("varsity.db", "UPDATE Members SET statAtk = %s WHERE UserID = %s" % (str(attackNew), str(user.id)))
+                        add_coins(user, -userStats[0]*1000)
+                        await message.channel.send("Success") 
+                    elif str(reaction.emoji) == "\U0001F44E":
+                        await message.channel.send("Cancelled") 
+                await confirmation.clear_reactions()
+        elif args[1].upper() == "DEFENSE":
+            if not fetch_coins(user) >= userStats[1]*1000:
+                await message.channel.send("Insufficient Funds")
+            elif userStats[1] >= 300:
+                await message.channel.send("Cannot Upgrade Past 300")    
+            else:    
+                em=discord.Embed(tile="Train", description="Train **Defense** `%s` **---->** `%s` for **$%s**?\nThis transaction cannot be reversed!" % (str(userStats[1]), str(userStats[1]+5), str(userStats[1]*1000)), color=primary)
+                confirmation = await message.channel.send(embed=em)
+                await confirmation.add_reaction("\U0001F44D")
+                await confirmation.add_reaction("\U0001F44E")
+                def check(reaction, user):
+                    return user == message.author and (str(reaction.emoji) == '\U0001F44D' or str(reaction.emoji) == "\U0001F44E")
+                try:
+                    reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
+                except asyncio.TimeoutError:
+                    await message.channel.send('Timed Out')
+                else:
+                    if str(reaction.emoji) == "\U0001F44D":
+                        defenseNew = userStats[1] + 5
+                        execute_query("varsity.db", "UPDATE Members SET statDef = %s WHERE UserID = %s" % (str(defenseNew), str(user.id)))
+                        add_coins(user, -userStats[1]*1000)
+                        await message.channel.send("Success") 
+                    elif str(reaction.emoji) == "\U0001F44E":
+                        await message.channel.send("Cancelled")
+                await confirmation.clear_reactions()
+        elif args[1].upper() == "HP":
+            if not fetch_coins(user) >= userStats[2]*1000:
+                await message.channel.send("Insufficient Funds")
+            elif userStats[0] >= 450:
+                await message.channel.send("Cannot Upgrade Past 450")    
+            else:    
+                em=discord.Embed(tile="Train", description="Train **Hit Points** `%s` **---->** `%s` for **$%s**?\nThis transaction cannot be reversed!" % (str(userStats[2]), str(userStats[2]+5), str(userStats[2]*1000)), color=primary)
+                confirmation = await message.channel.send(embed=em)
+                await confirmation.add_reaction("\U0001F44D")
+                await confirmation.add_reaction("\U0001F44E")
+                def check(reaction, user):
+                    return user == message.author and (str(reaction.emoji) == '\U0001F44D' or str(reaction.emoji) == "\U0001F44E")
+                try:
+                    reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
+                except asyncio.TimeoutError:
+                    await message.channel.send('Timed Out')
+                else:
+                    if str(reaction.emoji) == "\U0001F44D":
+                        hpNew = userStats[2] + 5
+                        execute_query("varsity.db", "UPDATE Members SET statHp = %s WHERE UserID = %s" % (str(hpNew), str(user.id)))
+                        add_coins(user, -userStats[2]*1000)
+                        await message.channel.send("Success") 
+                    elif str(reaction.emoji) == "\U0001F44E":
+                        await message.channel.send("Cancelled")
+                await confirmation.clear_reactions()
+    training.remove(message.author.id)
+            
+#!quickmaths
+@Bot.command(client)
+async def quickmaths(ctx):
+    '''
+    Quick Maths cus why not 
+
+    Required Permission: @Uber Regular
+
+    '''
+    if await hasPerms(2, ctx):
+        await ctx.send("**2+2 IS __4__! MINUS 1 THAT'S __3__! __*QUICK MATHS!*__**")
+
+#!tag
+@Bot.command(client)
+async def tag(ctx):
+    '''
+    Send a premade message
+
+    Required Permission: @Uber Regular
+    Required Arguments: Tag Name
+
+    '''
+    if await hasPerms(2, ctx):
+        message = ctx.message
+        args = message.content.split()
+        if len(args) <= 1:
+            await error("Invalid Command Usage - Not enough args", ctx.message.channel)
+            return
+        if args[1].upper().startswith("TOKEN"):
+            em = discord.Embed(title="Tokens", description='''**__DO NOT SHARE YOUR TOKEN!__** Doing so may result in your bot being hacked. We don't take responsibility for your bot being hacked. If for some reason you do leak it, immediately change it as it will automatically invalidate the previous token.''', color=0xffd343)
+            await message.channel.send(embed=em)
+        elif args[1].upper().startswith("PING"):
+            em = discord.Embed(title="Ping Pong", description='''Don't ping or DM Members for help with your script. Just ask it in the correct help channel, and someone will see it eventually. Also, please refrain from pinging the @Staff role, as some staff members do not code, and would rather not be pinged for this type of stuff.''', color=0xffd343)
+            await message.channel.send(embed=em)
+        elif args[1].upper().startswith("PYTHON"):
+            em = discord.Embed(title="Python Downloads and Docs", description='''**Python 3.6.5 Download:** https://www.python.org/downloads/release/python-365/
+    **Python 3.7 Download:** https://www.python.org/downloads/release/python-370/
+    **Python 3 Documentation:** https://docs.python.org/3/
+    ''', color=0xffd343)
+            await message.channel.send(embed=em)
+        elif args[1].upper().startswith("QUESTION"):
+            em = discord.Embed(title="Asking Questions", description='''Please don't post one message saying "Help something don't work" and wait for a response. Most people prefer to judge whether the issue is in their grasp or something they can handle in the time they've got. To allow us to help you, please provide as much information as possible when posting your issue, for example - What the error is, error logs and your code with sensitive information removed. (Please use code blocks for these thing)''', color=0xffd343)
+            await message.channel.send(embed=em)
+        elif args[1].upper().startswith("ANSWERING"):
+            em = discord.Embed(title="Answering Questions", description='''Please only answer questions that you actually know the answer to, don't respond with things that you guess are correct, it doesn't help anyone. Please don't contradict someone's answer with what you believe is the "better" way of doing something, it confuses everyone. Just don't do it.
+
+    Also, We've seen some smartass answers and argument over whose way is better and it's annoying and not helpful.
+
+    If you are caught doing this and we feel it is best if you didn't type in help channels, we'll revoke your permissions to use them.''', color=0xffd343)
+            await message.channel.send(embed=em)
 
 #!cookie
 @Bot.command(client)
 async def cookie(ctx):
+    '''
+    Give someone a cookie
+
+    Required Permission: @Uber Regular
+    Required Arguments: Mention
+
+    '''
     if await hasPerms(2, ctx):
         args = ctx.message.content.split()
         cookie_type = random.choice(["just gave you a chocolate chip cookie!", "just gave you a oat cookie!", "just gave you a super sized cookie!", "just gave you a lemon cookie!"])
         await ctx.message.channel.send("%s - %s %s :cookie:" % (args[1], ctx.message.author.mention, cookie_type))
-       
 
 #!nick
 @Bot.command(client)
 async def nick(ctx):
+    '''
+    Change your nickname
+
+    Required Permission: @Uber Regular
+
+    '''
     if await hasPerms(2, ctx):
         args = ctx.message.content.split()
         message = ctx.message
@@ -1096,7 +1244,6 @@ Please type your new nickname below or type "cancel" to exit.""", color=primary)
                 menu = await message.author.send(embed=em)
                 def check(m):
                     return m.channel == menu.channel and m.author == message.author
-
                 msg = await client.wait_for('message', check=check)
                 if len(msg.content) > 32:
                     await message.author.send("**Error whilst setting nickname, nickname is too long** (Max 32 Characters)")
@@ -1110,77 +1257,21 @@ Please type your new nickname below or type "cancel" to exit.""", color=primary)
                     await message.author.edit(nick=msg.content, reason="Nickname Change Command")
                     execute_query("varsity.db", "UPDATE Members SET lastNick = %s WHERE UserID=%s" % (str(otime), str(message.author.id)))
                     await message.author.send(":ok_hand: **Your nickname has been updated!**")
-                    
             except Exception as e:
                 await message.channel.send("Unable to send prompt, please allow private messages from the server")
                 if "Moderators" in [role.name for role in message.author.roles]:
                     await message.channel.send(e)
-
-            
-            
-#!hug
-@Bot.command(client)
-async def slap(ctx):
-    if await hasPerms(5, ctx):
-        args = ctx.message.content.split()
-        await ctx.message.channel.send("%s has just slapped %s!" % (ctx.message.author.mention, args[1]))
-        
-#!hug
-@Bot.command(client)
-async def hug(ctx):
-    if await hasPerms(3, ctx):
-        args = ctx.message.content.split()
-        hug_type = random.choice(["just gave you a big hug!", "just gave you a big big hug!", "just gave you a tight squeeze!", "just gave you a bog standard hug!"])
-        await ctx.message.channel.send("%s - %s %s :hugging:" % (args[1], ctx.message.author.mention, hug_type))
-      
-
-
-
-#!fight
-@Bot.command(client)
-async def fight(ctx):
-    message = ctx.message
-    args = message.content.split()
-    if await hasPerms(4, ctx):
-        global battleInProgress
-        if battleInProgress:
-            await error("A Fight Is Already In Progress, Please Wait", message.channel)
-            return
-            
-        battleInProgress = True
-        loss = 0
-        rounds = 1
-        init = message.author.mention
-        target = " ".join(args[1:])
-        fight = "%s has challenged %s to a fight!" % (init, target) + "\n"
-        fightEm = discord.Embed(title="Fight!", description=fight, colour=0x5555FF) 
-        fMessage = await message.channel.send(embed=fightEm)
-        while not (loss == 1) and not (rounds > 5): 
-            fight = fight + random.choice(["%s threw a chair at %s" % (init, target), "%s whacked %s with a stick" % (init, target), "%s slapped %s to the floor" % (init, target), "%s threw %s through a wall" % (init, target), "%s bitch slapped %s" % (init, target), "%s used dark magic against %s" % (init, target), "%s used the infinity gauntlet" % (init), "%s used fake news on %s" % (init, target), "%s ran %s over with a truck" % (init, target), "%s ate %s and threw them up again" % (init, target), "%s savagely roasted %s for sunday lunch" % (init, target), "%s performed a windows update on %s" % (init, target), "%s used the might of Zeus" % (init), "%s trapped %s in Flex Tape" % (init, target), "%s built a wall!" % (init)])+"\n"
-            fightEm = discord.Embed(title="Fight!", description=fight, colour=0x5555FF) 
-            await fMessage.edit(embed=fightEm)
-            await asyncio.sleep(2)
-            loss = random.randint(1, 3)
-            if loss == 1:
-                fight = fight + "%s accepts defeat! %s has won the fight!" % (target, init)
-            elif rounds == 5:
-                fight = fight + "The fight has ended in a draw!"
-            else:
-                fight = fight +"%s does not giveup and continues the fight!" % (target) + "\n"
-
-            fightEm = discord.Embed(title="Fight!", description=fight, colour=0x5555FF)
-            await fMessage.edit(embed=fightEm)
-            
-            temp = target
-            target = init
-            init = temp
-            rounds = rounds + 1
-            await asyncio.sleep(4)
-        battleInProgress = False      
-        
-#!fight
+     
+#!battle
 @Bot.command(client)
 async def battle(ctx):
+    '''
+    Battle someone with a somewhat decent skills system
+
+    Required Permission: @Uber Regular
+    Required Arguments: Mention
+
+    '''
     if await hasPerms(2, ctx): 
         global battleInProgress
         moves = ["Bitch Slap", "Fake News", "Flex Tape", "A Trap", "Windows Update", "A Chair", "Train Delays", "The Infinity Gauntlet", "Dark Magic"] 
@@ -1227,9 +1318,7 @@ async def battle(ctx):
                     em.set_field_at(1, name=targetField, value="Attack: "+str(targetStats[0])+"\nDefense: "+str(targetStats[1]))
                     em.set_field_at(2, name="Battle Log:", value=attackLog)
                     await fightMsg.edit(embed=em)
-
                     await asyncio.sleep(0.5)
-
                     if not complete:
                         move = random.choice(moves)
                         attackDam = int(random.randint(round(targetStats[0]/2, 0), targetStats[0]+2) - round(userStats[1]/10, 0))
@@ -1245,7 +1334,6 @@ async def battle(ctx):
                         em.set_field_at(0, name=targetField, value="Attack: "+str(userStats[0])+"\nDefense: "+str(userStats[1]))
                         em.set_field_at(2, name="Battle Log:", value=attackLog)
                         await fightMsg.edit(embed=em)
-
                     await asyncio.sleep(1)
                 if targetHp == 0:
                     attackLog = attackLog + "**%s has won the battle!**" % (user.name)
@@ -1258,7 +1346,109 @@ async def battle(ctx):
         battleInProgress = False
 
 @Bot.command(client)
+async def ban(ctx):
+    '''
+    Fake Ban Someone
+
+    Required Permission: @Outstandingly Regular
+    Required Arguments: Mention
+
+    '''
+    if await hasPerms(3, ctx):
+        if fetch_coins(ctx.message.author) >= 15000 or "Moderators" in [role.name for role in ctx.message.author.roles]:
+            args = ctx.message.content.split(" ")
+            target = discord.utils.get(ctx.message.guild.members, mention=args[1])
+            issuer = ctx.message.author
+            reason = " ".join(args[2:])
+            em = discord.Embed(title="Punish", description="**%s** has banned **%s** for **9001 Days** for `%s`" % (issuer.name, target.name, reason), color=primary)
+            await ctx.send(embed=em)
+            if not "Moderators" in [role.name for role in ctx.message.author.roles]:
+                add_coins(ctx.message.author, -15000)
+
+#!hug
+@Bot.command(client)
+async def hug(ctx):
+    '''
+    Hug Someone
+
+    Required Permission: @Outstandingly Regular
+    Required Arguments: Mention
+
+    '''
+    if await hasPerms(3, ctx):
+        args = ctx.message.content.split()
+        hug_type = random.choice(["just gave you a big hug!", "just gave you a big big hug!", "just gave you a tight squeeze!", "just gave you a bog standard hug!"])
+        await ctx.message.channel.send("%s - %s %s :hugging:" % (args[1], ctx.message.author.mention, hug_type))
+      
+#!fight
+@Bot.command(client)
+async def fight(ctx):
+    '''
+    Fight Someone
+
+    Required Permission: @Super Outstandingly Regular
+    Required Arguments: Mention 
+
+    '''
+    message = ctx.message
+    args = message.content.split()
+    if await hasPerms(4, ctx):
+        global battleInProgress
+        if battleInProgress:
+            await error("A Fight Is Already In Progress, Please Wait", message.channel)
+            return
+        battleInProgress = True
+        loss = 0
+        rounds = 1
+        init = message.author.mention
+        target = " ".join(args[1:])
+        fight = "%s has challenged %s to a fight!" % (init, target) + "\n"
+        fightEm = discord.Embed(title="Fight!", description=fight, colour=0x5555FF) 
+        fMessage = await message.channel.send(embed=fightEm)
+        while not (loss == 1) and not (rounds > 5): 
+            fight = fight + random.choice(["%s threw a chair at %s" % (init, target), "%s whacked %s with a stick" % (init, target), "%s slapped %s to the floor" % (init, target), "%s threw %s through a wall" % (init, target), "%s bitch slapped %s" % (init, target), "%s used dark magic against %s" % (init, target), "%s used the infinity gauntlet" % (init), "%s used fake news on %s" % (init, target), "%s ran %s over with a truck" % (init, target), "%s ate %s and threw them up again" % (init, target), "%s savagely roasted %s for sunday lunch" % (init, target), "%s performed a windows update on %s" % (init, target), "%s used the might of Zeus" % (init), "%s trapped %s in Flex Tape" % (init, target), "%s built a wall!" % (init)])+"\n"
+            fightEm = discord.Embed(title="Fight!", description=fight, colour=0x5555FF) 
+            await fMessage.edit(embed=fightEm)
+            await asyncio.sleep(2)
+            loss = random.randint(1, 3)
+            if loss == 1:
+                fight = fight + "%s accepts defeat! %s has won the fight!" % (target, init)
+            elif rounds == 5:
+                fight = fight + "The fight has ended in a draw!"
+            else:
+                fight = fight +"%s does not giveup and continues the fight!" % (target) + "\n"
+            fightEm = discord.Embed(title="Fight!", description=fight, colour=0x5555FF)
+            await fMessage.edit(embed=fightEm)
+            temp = target
+            target = init
+            init = temp
+            rounds = rounds + 1
+            await asyncio.sleep(4)
+        battleInProgress = False
+
+#!slap
+@Bot.command(client)
+async def slap(ctx):
+    '''
+    Slap someone
+
+    Required Permission: @Ultra Super Outstandingly Regular
+    Required Arguments: Mention
+
+    '''
+    if await hasPerms(5, ctx):
+        args = ctx.message.content.split()
+        await ctx.message.channel.send("%s has just slapped %s!" % (ctx.message.author.mention, args[1]))
+
+@Bot.command(client)
 async def embed(ctx):
+    '''
+    Send a message in an Embed
+
+    Required Permission: @Extremely Ultra Super Outstandinly Regular
+    Required Arguments: Message
+
+    '''    
     if await hasPerms(6, ctx):
         args = ctx.message.content.split(" ")
         contents = " ".join(args[1:])
@@ -1269,124 +1459,29 @@ async def embed(ctx):
 
 @Bot.command(client)
 async def kitten(ctx):
+    '''
+    Sends a kitten gif.
+
+    Required Permission: @ECDLSec Employee
+    '''
     if await hasPerms(16, ctx):
         imgUrl = random.choice(["https://media.tenor.com/images/fe9cdda998e9d121f318c2d938c9c6a2/tenor.gif", "https://media.giphy.com/media/kvrvnB158J4fm/giphy.gif", "https://media.giphy.com/media/r1OyZ5NfRJigg/giphy.gif", "https://media.giphy.com/media/4rep3f9ih9u12/giphy.gif"])
         em = discord.Embed(title="Kitten", image=imgUrl, colour=secondary)
         em.set_image(url=imgUrl)
         await ctx.send(embed=em)
-    
         
-@Bot.command(client)
-async def train(ctx):
-    if await hasPerms(2, ctx):
-        global training
-        message = ctx.message
-        args = message.content.split()
-        user = message.author
-        userStats = db_query("varsity.db", "SELECT statAtk, statDef, statHp FROM Members WHERE UserID = %s" % (str(user.id)))[0]
-    
-        if message.author.id in training:
-            await error("Please react to previous confirmation box before preforming this action again", message.channel)
-            return
-        training.append(message.author.id)
-        if len(args) == 1:
-            em=discord.Embed(title="Stats", description="`Attack: %s` **[Upgrade Cost: `$%s`]**\n`Defense: %s` **[Upgrade Cost: `$%s`]**\n`HP: %s` **[Upgrade Cost: `$%s`]**" % (str(userStats[0]), str(userStats[0]*1000), str(userStats[1]), str(userStats[1]*1000), str(userStats[2]), str(userStats[2]*1000)), color=primary)
-            await message.channel.send(embed=em)
-        elif args[1].upper() == "ATTACK":
-            if not fetch_coins(user) >= userStats[0]*1000:
-                await message.channel.send("Insufficient Funds")
-            elif userStats[0] >= 300:
-                await message.channel.send("Cannot Upgrade Past 300")
-            else:    
-                em=discord.Embed(tile="Train", description="Train **Attack** `%s` **---->** `%s` for **$%s**?\nThis transaction cannot be reversed!" % (str(userStats[0]), str(userStats[0]+5), str(userStats[0]*1000)), color=primary)
-                confirmation = await message.channel.send(embed=em)
-                await confirmation.add_reaction("\U0001F44D")
-                await confirmation.add_reaction("\U0001F44E")
-
-                def check(reaction, user):
-                    return user == message.author and (str(reaction.emoji) == '\U0001F44D' or str(reaction.emoji) == "\U0001F44E")
-                try:
-                    reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
-                except asyncio.TimeoutError:
-                    await message.channel.send('Timed Out')
-                else:
-                    if str(reaction.emoji) == "\U0001F44D":
-                        attackNew = userStats[0] + 5
-                        execute_query("varsity.db", "UPDATE Members SET statAtk = %s WHERE UserID = %s" % (str(attackNew), str(user.id)))
-                        add_coins(user, -userStats[0]*1000)
-                        await message.channel.send("Success") 
-                    elif str(reaction.emoji) == "\U0001F44E":
-                        await message.channel.send("Cancelled") 
-                                      
-                        
-                await confirmation.clear_reactions()
-        elif args[1].upper() == "DEFENSE":
-            if not fetch_coins(user) >= userStats[1]*1000:
-                await message.channel.send("Insufficient Funds")
-            elif userStats[1] >= 300:
-                await message.channel.send("Cannot Upgrade Past 300")    
-            else:    
-                em=discord.Embed(tile="Train", description="Train **Defense** `%s` **---->** `%s` for **$%s**?\nThis transaction cannot be reversed!" % (str(userStats[1]), str(userStats[1]+5), str(userStats[1]*1000)), color=primary)
-                confirmation = await message.channel.send(embed=em)
-                await confirmation.add_reaction("\U0001F44D")
-                await confirmation.add_reaction("\U0001F44E")
-
-                def check(reaction, user):
-                    return user == message.author and (str(reaction.emoji) == '\U0001F44D' or str(reaction.emoji) == "\U0001F44E")
-                try:
-                    reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
-                except asyncio.TimeoutError:
-                    await message.channel.send('Timed Out')
-                else:
-                    if str(reaction.emoji) == "\U0001F44D":
-                        defenseNew = userStats[1] + 5
-                        execute_query("varsity.db", "UPDATE Members SET statDef = %s WHERE UserID = %s" % (str(defenseNew), str(user.id)))
-                        add_coins(user, -userStats[1]*1000)
-                        await message.channel.send("Success") 
-                    elif str(reaction.emoji) == "\U0001F44E":
-                        await message.channel.send("Cancelled")
-                        
-                await confirmation.clear_reactions()
-        elif args[1].upper() == "HP":
-            if not fetch_coins(user) >= userStats[2]*1000:
-                await message.channel.send("Insufficient Funds")
-            elif userStats[0] >= 450:
-                await message.channel.send("Cannot Upgrade Past 450")    
-            else:    
-                em=discord.Embed(tile="Train", description="Train **Hit Points** `%s` **---->** `%s` for **$%s**?\nThis transaction cannot be reversed!" % (str(userStats[2]), str(userStats[2]+5), str(userStats[2]*1000)), color=primary)
-                confirmation = await message.channel.send(embed=em)
-                await confirmation.add_reaction("\U0001F44D")
-                await confirmation.add_reaction("\U0001F44E")
-
-                def check(reaction, user):
-                    return user == message.author and (str(reaction.emoji) == '\U0001F44D' or str(reaction.emoji) == "\U0001F44E")
-                try:
-                    reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
-                except asyncio.TimeoutError:
-                    await message.channel.send('Timed Out')
-                else:
-                    if str(reaction.emoji) == "\U0001F44D":
-                        hpNew = userStats[2] + 5
-                        execute_query("varsity.db", "UPDATE Members SET statHp = %s WHERE UserID = %s" % (str(hpNew), str(user.id)))
-                        add_coins(user, -userStats[2]*1000)
-                        await message.channel.send("Success") 
-                    elif str(reaction.emoji) == "\U0001F44E":
-                        await message.channel.send("Cancelled")
-                        
-                await confirmation.clear_reactions()
-    training.remove(message.author.id)
-            
-#!quickmaths
-@Bot.command(client)
-async def quickmaths(ctx):
-    if await hasPerms(2, ctx):
-        await ctx.send("**2+2 IS __4__! MINUS 1 THAT'S __3__! __*QUICK MATHS!*__**")
-
 #--Admin Commands--
 
 #!badge
 @Bot.command(client)
 async def badge(ctx):
+    '''
+    Allow the Moderation Team to add a badge to a member.
+
+    Required Permission: @Moderator
+    Required Arguments: Add|Remove, Badge, Mention
+
+    '''
     if await hasPerms(32, ctx):
         message = ctx.message
         args = message.content.split()
@@ -1397,14 +1492,12 @@ async def badge(ctx):
             new_badges = current_badges + args[2] +" _ _"
             execute_query("varsity.db", "UPDATE Members SET Badges = '%s' WHERE UserID = %s" % (new_badges, str(user.id)))
             await message.channel.send(":ok_hand: Successfully added %s to **%s**'s profile!" % (badge, user.name))
-                
         if args[1].upper() == "REMOVE":
             badge = args[2] + " _ _"
             current_badges = get_profile(str(user.id))[3]
             new_badges = current_badges.replace(badge, '')
             execute_query("varsity.db", "UPDATE Members SET Badges = '%s' WHERE UserID = %s" % (new_badges, str(user.id)))
             await message.channel.send(":ok_hand: Successfully removed %s from **%s**'s profile!" % (badge, user.name))
-            
 
 #!disable
 @Bot.command(client)
@@ -1450,8 +1543,8 @@ async def enable(ctx, *args):
         else:    
             execute_query("varsity.db", "DELETE FROM disabledCommands WHERE command = '%s'" % (command)) 
             await ctx.send(":ok_hand: Successfully enabled `%s`" % command)
-        
 
+#!statmod
 @Bot.command(client)
 async def statmod(ctx, *args):
     '''
@@ -1481,7 +1574,6 @@ async def statmod(ctx, *args):
             await ctx.send("Invalid Usage, Please supply a user")
         else:   
             subcommand = args[2]
-            
             if subcommand.upper() == "SET":
                 if args[3].upper() == "BALANCE":
                     set_coins(user, int(args[4]))
@@ -1533,7 +1625,6 @@ async def statmod(ctx, *args):
                 await asyncio.sleep(15)
                 await confirmation.add_reaction("\U0001F44D")
                 await confirmation.add_reaction("\U0001F44E")
-
                 def check(reaction, actor):
                     return actor == message.author and (str(reaction.emoji) == '\U0001F44D' or str(reaction.emoji) == "\U0001F44E")
                 try:
@@ -1565,7 +1656,6 @@ async def statmod(ctx, *args):
 async def announce(ctx):
     if await hasPerms(32, ctx):
         args = ctx.message.content.split(" ")
-    
         announcement = " ".join(args[2:])
         if args[1].upper() == "SERVER":
             role = discord.utils.get(ctx.message.guild.roles, name="Server Announcements")
@@ -1579,7 +1669,6 @@ async def announce(ctx):
             await role.edit(mentionable=True)
             await client.get_channel(523991937200422933).send("%s\n%s\n_ _\nSent By: **%s**" % (role.mention, announcement, str(ctx.message.author)))
             await role.edit(mentionable=False)            
-            
 
 @Bot.command(client)
 async def raffle(ctx):
@@ -1631,7 +1720,7 @@ async def comment(ctx):
         embed.add_field(name="%s's Comment" % (ctx.message.author.name), value=" ".join(args[2:]), inline=False)
         await suggestion.edit(embed=embed)
         await ctx.message.delete()
-
+        await ctx.send("Your comment has been added")
 
 @Bot.command(client)
 async def suggestion(ctx):
@@ -1654,9 +1743,7 @@ async def suggestion(ctx):
             embed.add_field(name="Comment", value=" ".join(args[3:]), inline=False)
         await suggestion.edit(embed=embed)
         await ctx.message.delete()
-            
-            
-        
+     
 #-----Event Listners-----        
         
 @client.event
@@ -1697,7 +1784,6 @@ async def on_ready():
             await LBoardExp.edit(embed=em, content=None)
 
             leaderboard = db_query("varsity.db", "SELECT UserID, Balance FROM Members WHERE NOT UserID = 472063067014823938 AND NOT UserID = 1 ORDER BY Balance DESC")
-            #stats = db_query("varsity.db", "SELECT mostBal, mostBalHeldBy FROM serverStats")[0]
             index = 0
             for userID in leaderboard:
                 user = discord.utils.get(channel.guild.members, id=userID[0])
@@ -1744,12 +1830,12 @@ async def on_message(message):
     mSplit = message.content.split()
     mList = []
     for word in mSplit:
+        wordNew = word
         user = discord.utils.get(message.guild.members, mention=word.replace("@", "@!").replace("!!", "!")) #To prevent issues with mentioning not working in args for mobile users (A formatting issue on Discord's end which they refuse to fix...)
         if not user is None:
             if not user.nick is None:
-                word = word.replace("@", "@!").replace("!!", "!")
-        mList.append(word)
-    message.content = " ".join(mList)
+                wordNew = word.replace("@", "@!").replace("!!", "!")
+        message.content.replace(word, wordNew)
     
     args = message.content.split(" ")
 
@@ -1850,8 +1936,7 @@ async def on_message(message):
         elif message.content.upper().startswith("W!UPDATE"):
             for member in message.guild.members:
                 try:
-                    #insert_db_user(member)
-                    execute_query("varsity.db", "UPDATE Members SET displayName = '%s' WHERE UserID = %s" % (member.name, str(member.id)))
+                    insert_db_user(member)
                 except:
                     pass
 
@@ -1928,10 +2013,6 @@ Have fun!""", color=primary)
     #        except IndexError:
     #            await message.channel.send("Something went wrong with %s" % (member.name))
     #    await message.channel.send("Done")       
-        
-
-
-
 
 @client.event
 async def on_member_join(member):
@@ -1946,13 +2027,5 @@ async def user_accept_rules(member):
     default_role = discord.utils.get(member.guild.roles, name="Regular")
     await member.add_roles(default_role)
      
-        
-        
-        
-        
-        
-
-
-    
 print("Test")    
 client.run(token) #logs into the bot
