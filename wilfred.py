@@ -197,8 +197,6 @@ def balance_formatter(balance):
     fBalance = sBalance[0] + "." + sBalance[1][0:2] + sign
     return fBalance
     
-    
-    
 def set_coins(user, coins):
     user_id = user.id
     execute_query("varsity.db", "UPDATE Members SET Balance = %s WHERE UserID = %s" % (str(coins), str(user_id)))
@@ -278,8 +276,7 @@ async def check_level_up(userID, guild, channel):
                 await channel.send(embed=discord.Embed(title="Level Up!", description="Congratulations %s! You've reached Level 50! That means you've unlocked the `Extremely Ultra Super Outstandingly Regular` role! You've also been awarded $50000 for your achievement!" % (user.mention), color=0x992D22))
         else:
             Checking = False
-            
-            
+           
 def fetch_exps(userID):
     return db_query("varsity.db", "SELECT Exp, ExpTotal FROM Members WHERE UserID = %s" % (str(userID)))[0]
 
@@ -447,7 +444,7 @@ async def daily(ctx):
                 user = message.author
                 multiplier = reward[1]
                 expires = time.time() + int("".join(reward[2:]))
-                add_booser(user.id, multiplier, expires)
+                add_booster(user.id, multiplier, expires)
                 
         ''' For 100% chance event rewards '''        
         #rewards.append("b <:festive2018:526858321991303176>")
@@ -803,6 +800,70 @@ async def balance(ctx):
         em = discord.Embed(title="Balance", description="You currently have **$%s**\nThe server total is **$%s**\nThe server average is **$%s**" % (str("{:,}".format(uBalance)), str("{:,}".format(total_balance)), str("{:,}".format(int(round(total_balance/len(ctx.message.guild.members),0))))), color=primary)   
         em.set_footer(text="You currently contribute to %s%s of the economy" % (str(round((uBalance/total_balance)*100, 2)), "%")) 
         await ctx.message.channel.send(embed=em)
+
+#!notify
+@Bot.command(client)
+async def notify(ctx):
+    '''
+    Join or leave a notification group
+
+    Required Permission: @Regular
+    Required Arguments: Notifications 
+
+    '''
+    if hasPerms(1, ctx):
+        message = ctx.message
+        args = ctx.message.content.split()
+        if len(args) == 1:
+            await ctx.send("You can choose to join/leave the following notification groups:\nWindows\nApple\Android\Tech\Server\Wilfred") 
+        elif args[1].upper() == "WINDOWS":
+            role = discord.utils.get(message.guild.roles, name="Windows Insiders")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Windows Insiders** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Windows Insiders** announcement group")
+        elif args[1].upper() == "APPLE":
+            role = discord.utils.get(message.guild.roles, name="Apple Developers")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Apple Developers** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Apple Developers** announcement group")
+        elif args[1].upper() == "ANDROID":
+            role = discord.utils.get(message.guild.roles, name="Android Beta")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Android Beta** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Android Beta** announcement group")
+        elif args[1].upper() == "TECH":
+            role = discord.utils.get(message.guild.roles, name="Technology")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Technology** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Technology** announcement group")
+        elif args[1].upper() == "SERVER":
+            role = discord.utils.get(message.guild.roles, name="Server Announcements")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Server Announcements** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Server Announcements** announcement group")
+        elif args[1].upper() == "WILFRED":
+            role = discord.utils.get(message.guild.roles, name="Wilfred Development")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Wilfred Development** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Wilfred Development** announcement group")    
 
 #!pay
 @Bot.command(client)
@@ -1869,60 +1930,6 @@ async def on_message(message):
                 await message.channel.send("You are already entered")
 
         #--Role Commands--             
-
-        elif message.content.upper().startswith("!WINDOWS"):
-            role = discord.utils.get(message.guild.roles, name="Windows Insiders")
-            if not role.name in [r.name for r in message.author.roles]:
-                await message.author.add_roles(role)
-                await message.channel.send("Successfully added you to the **Windows Insiders** announcement group")
-            else:
-                await message.author.remove_roles(role)
-                await message.channel.send("Successfully removed you from the **Windows Insiders** announcement group")
-
-        elif message.content.upper().startswith("!APPLE"):
-            role = discord.utils.get(message.guild.roles, name="Apple Developers")
-            if not role.name in [r.name for r in message.author.roles]:
-                await message.author.add_roles(role)
-                await message.channel.send("Successfully added you to the **Apple Developers** announcement group")
-            else:
-                await message.author.remove_roles(role)
-                await message.channel.send("Successfully removed you from the **Apple Developers** announcement group")
-                
-        elif message.content.upper().startswith("!ANDROID"):
-            role = discord.utils.get(message.guild.roles, name="Android Beta")
-            if not role.name in [r.name for r in message.author.roles]:
-                await message.author.add_roles(role)
-                await message.channel.send("Successfully added you to the **Android Beta** announcement group")
-            else:
-                await message.author.remove_roles(role)
-                await message.channel.send("Successfully removed you from the **Android Beta** announcement group")
-                
-        elif message.content.upper().startswith("!TECH"):
-            role = discord.utils.get(message.guild.roles, name="Technology")
-            if not role.name in [r.name for r in message.author.roles]:
-                await message.author.add_roles(role)
-                await message.channel.send("Successfully added you to the **Technology** announcement group")
-            else:
-                await message.author.remove_roles(role)
-                await message.channel.send("Successfully removed you from the **Technology** announcement group")
-                
-        elif message.content.upper().startswith("!SERVER"):
-            role = discord.utils.get(message.guild.roles, name="Server Announcements")
-            if not role.name in [r.name for r in message.author.roles]:
-                await message.author.add_roles(role)
-                await message.channel.send("Successfully added you to the **Server Announcements** announcement group")
-            else:
-                await message.author.remove_roles(role)
-                await message.channel.send("Successfully removed you from the **Server Announcements** announcement group")
-
-        elif message.content.upper().startswith("!WILFRED"):
-            role = discord.utils.get(message.guild.roles, name="Wilfred Development")
-            if not role.name in [r.name for r in message.author.roles]:
-                await message.author.add_roles(role)
-                await message.channel.send("Successfully added you to the **Wilfred Development** announcement group")
-            else:
-                await message.author.remove_roles(role)
-                await message.channel.send("Successfully removed you from the **Wilfred Development** announcement group")
 
         elif message.content.upper().startswith("!SUDO"): #This needs to be moved under cmd-ext; Will be done at later stage ~Frank
             if hasPerms(32, message):
