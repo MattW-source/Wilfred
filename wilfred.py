@@ -11,7 +11,7 @@ import random
 token = ""
 buildVersion = "060319.In-Dev"
 
-from secrets import *
+from secrets import * #Token will be stored in here so I don't accidentally leak the admin token for my Discord again...
 
 #color schemes
 primary = 0x55FF55
