@@ -394,7 +394,6 @@ async def daily(ctx):
             if not streak == 5:
                 streak = streak + 1
                 execute_query("varsity.db", "UPDATE Members SET dailyRewardStreak = %s WHERE UserID=%s" % (str(streak), str(message.author.id)))
-            
 
         execute_query("varsity.db", "UPDATE Members SET dailyRewardClaimed = %s WHERE UserID=%s" % (str(otime), str(message.author.id)))
         
@@ -438,34 +437,36 @@ async def daily(ctx):
                 expires = time.time() + int("".join(reward[2:]))
                 add_booser(user.id, multiplier, expires)
                 
+        ''' For 100% chance event rewards '''        
         #rewards.append("b <:festive2018:526858321991303176>")
         #em = discord.Embed(title="[1] MYTHICAL", description="Mythical Festive 2018 Badge", color=0xFF5555)
         #rewardMsgs.append(await message.channel.send(embed=em))
+                
         for count in range(1,4):
-            rewardLevel = random.randint(1, 50) + streak + levelBoost
+            rewardLevel = random.randint(1, 100) + streak + levelBoost
             if message.author.id == 479263631586885633:
                 rewardLevel = rewardLevel + 7
-            if rewardLevel <= 20:
+            if rewardLevel <= 40: #0-40 (40%)
                 reward = random.choice(commons)
                 rewardText = getReward(reward)
                 rewards.append(reward)
                 em = discord.Embed(title="[%s] COMMON" % (str(count)), description="Common %s" % (rewardText), color=0xFFFFFF) 
-            elif rewardLevel <= 35:
+            elif rewardLevel <= 70: #41-70 (30%)
                 reward = random.choice(uncommons)
                 rewardText = getReward(reward)
                 rewards.append(reward)
                 em = discord.Embed(title="[%s] UNCOMMON" % (str(count)), description="Uncommon %s" % (rewardText), color=0x55FFFF) 
-            elif rewardLevel <= 45:
+            elif rewardLevel <= 87: #71-87 (16%)
                 reward = random.choice(rares)
                 rewardText = getReward(reward)
                 rewards.append(reward)
                 em = discord.Embed(title="[%s] RARE" % (str(count)), description="Rare %s" % (rewardText), color=0xFF55FF) 
-            elif rewardLevel <= 50:
+            elif rewardLevel <= 97: #88-97 (9%)
                 reward = random.choice(legendaries)
                 rewardText = getReward(reward)
                 rewards.append(reward)
                 em = discord.Embed(title="[%s] LEGENDARY" % (str(count)), description="Legendary %s" % (rewardText), color=0x55FF55) 
-            elif rewardLevel >= 50:
+            elif rewardLevel >= 97: #98->100 (2%)
                 reward = random.choice(mythicals)
                 rewardText = getReward(reward)
                 rewards.append(reward)
@@ -483,7 +484,6 @@ async def daily(ctx):
         await msg.add_reaction("2⃣")
         await msg.add_reaction("3⃣")
 
-
         def check(reaction, user):
             return (user.id == message.author.id) and (str(reaction.emoji) == "1⃣" or str(reaction.emoji) == "2⃣" or str(reaction.emoji) == "3⃣")
         
@@ -496,51 +496,37 @@ async def daily(ctx):
                 for count in range(0, 3):
                     if not count == 0:
                         await rewardMsgs[count].delete()
-                        await asyncio.sleep(1)
-                await asyncio.sleep(1)
+                        await asyncio.sleep(1.5)
+                await asyncio.sleep(0.5)
                 await msg.delete()
                 await asyncio.sleep(1)
                 await rewardMsgs[0].delete()
-                await message.channel.send("**Congratulations! You've unlocked __%s__**" % (getReward(rewards[0])))
+                await message.channel.send("**Congratulations %s! You've unlocked __%s__**" % (ctx.author.mention, getReward(rewards[0])))
                 await applyReward(rewards[0])
             if str(reaction.emoji) == "2⃣":
                 for count in range(0, 3):
                     if not count == 1:
                         await rewardMsgs[count].delete()
-                        await asyncio.sleep(1)
-                await asyncio.sleep(1)
+                        await asyncio.sleep(1.5)
+                await asyncio.sleep(0.5)
                 await msg.delete()
                 await asyncio.sleep(1)
                 await rewardMsgs[1].delete()
                 
-                await message.channel.send("**Congratulations! You've unlocked __%s__**" % (getReward(rewards[1])))
+                await message.channel.send("**Congratulations %s! You've unlocked __%s__**" % (ctx.author.mention, getReward(rewards[1])))
                 await applyReward(rewards[1])
             if str(reaction.emoji) == "3⃣":
                 for count in range(0, 3):
                     if not count == 2:
                         await rewardMsgs[count].delete()
-                        await asyncio.sleep(1)
-                await asyncio.sleep(1)
+                        await asyncio.sleep(1.5)
+                await asyncio.sleep(0.5)
                 await msg.delete()
                 await asyncio.sleep(1)
                 await rewardMsgs[2].delete()
-                await message.channel.send("**Congratulations! You've unlocked __%s__**" % (getReward(rewards[2])))
+                await message.channel.send("**Congratulations %s! You've unlocked __%s__**" % (ctx.author.mention, getReward(rewards[2])))
                 await applyReward(rewards[2])
-                
-
-                
-
-
-
-        ## 1⃣ 2⃣ 3⃣
-
         
-
-        
-
-                
-
-            
 #!shop
 @Bot.command(client)
 async def shop(ctx):
