@@ -8,7 +8,6 @@ from discord.voice_client import VoiceClient
 import _thread as thread
 import random
 
-#time.sleep(30) #Give Server time to init networking [Since this is now being autoran under SystemD] 
 token = ""
 buildVersion = "060319.In-Dev"
 
@@ -1154,8 +1153,6 @@ async def hug(ctx):
 #!fight
 @Bot.command(client)
 async def fight(ctx):
-    #await error("This command has been disabled by the Administration Team as it causes too many issues with our rate limit", ctx.message.channel)
-    #return
     message = ctx.message
     args = message.content.split()
     if await hasPerms(4, ctx):
@@ -1193,7 +1190,8 @@ async def fight(ctx):
             init = temp
             rounds = rounds + 1
             await asyncio.sleep(4)
-        battleInProgress = False         
+        battleInProgress = False      
+        
 #!fight
 @Bot.command(client)
 async def battle(ctx):
@@ -1686,8 +1684,6 @@ async def on_ready():
     channel = client.get_channel(521326677960294400)
     LBoardExp = await channel.get_message(521326939529805845)
     LBoardBal = await channel.get_message(521326947150856235)
-    #LBoardEvent = await channel.get_message(521340954494631977)
-    #LBoardRecords = await channel.get_message(526129403818672138)
     if Loop:
         return
     loop = True
@@ -1954,8 +1950,6 @@ Have fun!""", color=primary)
 @client.event
 async def on_member_join(member):
     insert_db_user(member)
-    #role = discord.utils.get(member.guild.roles, name="-----===== Notif Roles =====-----")
-    #member.add_roles(role)
         
 async def user_accept_rules(member):
     channel = client.get_channel(casual)
@@ -1963,10 +1957,9 @@ async def user_accept_rules(member):
     em = discord.Embed(title="Welcome!", description="Hello %s, Welcome to **Varsity Discord**! We hope you enjoy your time here!" % (member.name), colour=primary)
     em.set_footer(text="We now have %s Members!" % (len(member.guild.members)))
     await channel.send(embed=em)
-    #reg_role = discord.utils.get(member.guild.roles, name="Member")
     default_role = discord.utils.get(member.guild.roles, name="Regular")
     await member.add_roles(default_role)
-    #await member.add_roles(reg_role)        
+     
         
         
         
