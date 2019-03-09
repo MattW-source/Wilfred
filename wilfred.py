@@ -511,20 +511,8 @@ async def daily(ctx):
                 await message.channel.send("**Congratulations! You've unlocked __%s__**" % (getReward(rewards[2])))
                 await applyReward(rewards[2])
                 
-
-                
-
-
-
         ## 1⃣ 2⃣ 3⃣
-
         
-
-        
-
-                
-
-            
 #!shop
 @Bot.command(client)
 async def shop(ctx):
@@ -673,7 +661,6 @@ async def profile(ctx):
                     if not cosmetics is None:
                         cosmetics = cosmetics.split("_")
                         
-
                         for item in cosmetics:
                             itemName = "".join(item[1:]) 
                             if item[0] == "c":
@@ -731,8 +718,7 @@ async def profile(ctx):
                 bpos = bpos + 1
             else:
                 break        
-        
-
+       
         rank = get_rank(user)
         em.set_author(name=rank[0], icon_url=rank[1])
 
@@ -806,7 +792,6 @@ async def pay(ctx):
                 else:
                     await message.channel.send("Invalid Response - Transaction Cancelled")
 
-            
 #!ransack
 @Bot.command(client)
 async def ransack(ctx):
@@ -859,8 +844,6 @@ async def ransack(ctx):
                 await message.channel.send(embed=discord.Embed(title="Ransack", description="You failed to ransack **%s** and were fined **$%s** for your attempt!\nYou may try again in 15 minutes." % (user.name, str(amount)), color=0xFF5555))
                 add_bal(user, int(round(amount/2, 0)))
 
-
-
 #!tag
 @Bot.command(client)
 async def tag(ctx):
@@ -893,7 +876,6 @@ async def tag(ctx):
     If you are caught doing this and we feel it is best if you didn't type in help channels, we'll revoke your permissions to use them.''', color=0xffd343)
             await message.channel.send(embed=em)
             
-    
 #!suggest
 @Bot.command(client)
 async def suggest(ctx):
@@ -996,11 +978,7 @@ async def items(ctx):
                             remove_item("MYTHICAL RANSACK KEY", ctx.message.author)
             else:
                 ctx.message.channel.send("Invalid Item")
-                            
-
-                
-        
-        
+                    
 @Bot.command(client)
 async def ban(ctx):
     if await hasPerms(3, ctx):
@@ -1013,8 +991,7 @@ async def ban(ctx):
             await ctx.send(embed=em)
             if not "Moderators" in [role.name for role in ctx.message.author.roles]:
                 add_bal(ctx.message.author, -15000)
-    
-
+                
 #--Connection Commands--
 
 #!ping
@@ -1046,10 +1023,6 @@ async def debug(ctx):
         ping = int(round(end - start, 0))
         nEm = msg.embeds[0].set_field_at(0, name="Latency", value="`%sms`" % (str(ping)))
         await msg.edit(embed=nEm)
-    
-    
-                 
-    
 
 #--Level Commands--
 
@@ -1060,7 +1033,6 @@ async def cookie(ctx):
         args = ctx.message.content.split()
         cookie_type = random.choice(["just gave you a chocolate chip cookie!", "just gave you a oat cookie!", "just gave you a super sized cookie!", "just gave you a lemon cookie!"])
         await ctx.message.channel.send("%s - %s %s :cookie:" % (args[1], ctx.message.author.mention, cookie_type))
-       
 
 #!nick
 @Bot.command(client)
@@ -1113,8 +1085,6 @@ Please type your new nickname below or type "cancel" to exit.""", color=primary)
                 await message.channel.send("Unable to send prompt, please allow private messages from the server")
                 if "Moderators" in [role.name for role in message.author.roles]:
                     await message.channel.send(e)
-
-            
             
 #!hug
 @Bot.command(client)
@@ -1130,9 +1100,6 @@ async def hug(ctx):
         args = ctx.message.content.split()
         hug_type = random.choice(["just gave you a big hug!", "just gave you a big big hug!", "just gave you a tight squeeze!", "just gave you a bog standard hug!"])
         await ctx.message.channel.send("%s - %s %s :hugging:" % (args[1], ctx.message.author.mention, hug_type))
-      
-
-
 
 #!fight
 @Bot.command(client)
@@ -1271,7 +1238,6 @@ async def kitten(ctx):
         em.set_image(url=imgUrl)
         await ctx.send(embed=em)
     
-        
 @Bot.command(client)
 async def train(ctx):
     if await hasPerms(2, ctx):
@@ -1313,8 +1279,7 @@ async def train(ctx):
                         await message.channel.send("Success") 
                     elif str(reaction.emoji) == "\U0001F44E":
                         await message.channel.send("Cancelled") 
-                                      
-                        
+                                       
                 await confirmation.clear_reactions()
         elif args[1].upper() == "DEFENSE":
             if not fetch_bal(user) >= userStats[1]*1000:
