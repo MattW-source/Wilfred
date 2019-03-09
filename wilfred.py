@@ -1737,6 +1737,11 @@ async def on_ready():
     activity=discord.Game(name="Wilfred %s" % (str(buildVersion)))
     await client.change_presence(activity=activity)
     channel = client.get_channel(521326677960294400)
+    for member in channel.guild.members:
+        try:
+            insert_db_user(member)
+        except:
+            pass
     LBoardExp = await channel.get_message(521326939529805845)
     LBoardBal = await channel.get_message(521326947150856235)
     if Loop:
@@ -1915,13 +1920,6 @@ async def on_message(message):
                 message.author = target
                 message.channel = channel
        
-        elif message.content.upper().startswith("W!UPDATE"):
-            for member in message.guild.members:
-                try:
-                    insert_db_user(member)
-                except:
-                    pass
-
     if message.channel.id in [473284192491536384, 483940602040549376]:
         hasMsg = db_query("varsity.db", "SELECT devMsg FROM Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
         if hasMsg == 0:
