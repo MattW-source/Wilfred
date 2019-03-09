@@ -189,8 +189,6 @@ def balance_formatter(balance):
     fBalance = sBalance[0] + "." + sBalance[1][0:2] + sign
     return fBalance
     
-    
-    
 def set_bal(user, bal):
     user_id = user.id
     execute_query("varsity.db", "UPDATE Members SET Balance = %s WHERE UserID = %s" % (str(bal), str(user_id)))
@@ -270,8 +268,7 @@ async def check_level_up(userID, guild, channel):
                 await channel.send(embed=discord.Embed(title="Level Up!", description="Congratulations %s! You've reached Level 50! That means you've unlocked the `Extremely Ultra Super Outstandingly Regular` role! You've also been awarded $50000 for your achievement!" % (user.mention), color=0x992D22))
         else:
             Checking = False
-            
-            
+                     
 def fetch_exps(userID):
     return db_query("varsity.db", "SELECT Exp, ExpTotal FROM Members WHERE UserID = %s" % (str(userID)))[0]
 
@@ -314,7 +311,6 @@ def get_rank(user):
     else:
         rank.append("Member")
         rank.append("https://cdn.discordapp.com/emojis/486269178047627266.png")
-
     return rank
 
 def time_phaser(seconds):
@@ -466,7 +462,6 @@ async def daily(ctx):
         await msg.add_reaction("1⃣")
         await msg.add_reaction("2⃣")
         await msg.add_reaction("3⃣")
-
 
         def check(reaction, user):
             return (user.id == message.author.id) and (str(reaction.emoji) == "1⃣" or str(reaction.emoji) == "2⃣" or str(reaction.emoji) == "3⃣")
@@ -739,7 +734,6 @@ async def profile(ctx):
             em.set_footer(text="#"+profile[5])
 
         await message.channel.send(embed=em)
-        
         
 @Bot.command(client, aliases=["bal"])
 async def balance(ctx):
