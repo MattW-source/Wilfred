@@ -65,6 +65,18 @@ def db_query(table, query):
     conn.close()
     return result
 
+def cinfo(text): #Info Level Log Output
+    print("[" +str(time.ctime()) +"] [INFO] " +text)
+
+def cwarn(text): #Warn Level Log Output
+    print("[" +str(time.ctime()) +"] [WARNING] " +text)
+
+def cerror(text): #Error Level Log Output
+    print("[" +str(time.ctime()) +"] [ERROR] " +text)
+
+def cdebug(text): #Error Level Log Output
+    print("[" +str(time.ctime()) +"] [DEBUG] " +text)  
+
 async def error(reason, channel, details=None):
     em = discord.Embed(title="Error", description="An error occurred when attempting to perform that request. Please check the Syntax and try again.\nError: `%s`" % reason, colour=0xFF5555)
     msg = await channel.send(embed=em)
