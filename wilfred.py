@@ -14,8 +14,8 @@ buildVersion = "090319.r1"
 #from secrets import * #Token will be stored in here so I don't accidentally leak the admin token for my Discord again...
 
 #color schemes
-primary =  0xFF5555 #0x55FF55
-secondary = 0xFF5555 #0x04bfbf
+primary =  0x55FF55
+secondary = 0x04bfbf
 reds = 0xf93b3b
 
 
@@ -47,8 +47,8 @@ client.remove_command("help")
 #"/home/pi/varsity-discord/"+
 
 def execute_query(table, query):
-    #conn = sqlite3.connect("/home/rsa-key-20190102/"+table)
-    conn = sqlite3.connect(table)
+    conn = sqlite3.connect("/home/rsa-key-20190102/"+table)
+    #conn = sqlite3.connect(table)
     c = conn.cursor()
     c.execute(query)
     conn.commit()
@@ -56,8 +56,8 @@ def execute_query(table, query):
     conn.close()
 
 def db_query(table, query):
-    #conn = sqlite3.connect("/home/rsa-key-20190102/"+table)
-    conn = sqlite3.connect(table)
+    conn = sqlite3.connect("/home/rsa-key-20190102/"+table)
+    #conn = sqlite3.connect(table)
     c = conn.cursor()
     c.execute(query)
     result = c.fetchall()
