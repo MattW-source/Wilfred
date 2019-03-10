@@ -9,13 +9,13 @@ import _thread as thread
 import random
 
 token = ""
-buildVersion = "060319.In-Dev"
+buildVersion = "090319.r1"
 
 #from secrets import * #Token will be stored in here so I don't accidentally leak the admin token for my Discord again...
 
 #color schemes
-primary = 0x55FF55
-secondary = 0x04bfbf
+primary =  0xFF5555 #0x55FF55
+secondary = 0xFF5555 #0x04bfbf
 reds = 0xf93b3b
 
 
@@ -47,8 +47,8 @@ client.remove_command("help")
 #"/home/pi/varsity-discord/"+
 
 def execute_query(table, query):
-    conn = sqlite3.connect("/home/rsa-key-20190102/"+table)
-    #conn = sqlite3.connect(table)
+    #conn = sqlite3.connect("/home/rsa-key-20190102/"+table)
+    conn = sqlite3.connect(table)
     c = conn.cursor()
     c.execute(query)
     conn.commit()
@@ -56,8 +56,8 @@ def execute_query(table, query):
     conn.close()
 
 def db_query(table, query):
-    conn = sqlite3.connect("/home/rsa-key-20190102/"+table)
-    #conn = sqlite3.connect(table)
+    #conn = sqlite3.connect("/home/rsa-key-20190102/"+table)
+    conn = sqlite3.connect(table)
     c = conn.cursor()
     c.execute(query)
     result = c.fetchall()
@@ -158,13 +158,13 @@ def insert_db_user(member):
         pass
         
 def give_item(item, member):
-    execute_query("varsity.db", "INSERT INTO items (belongsTo, itemName) VALUES (%s, '%s')" % (str(member.id), str(item)))
+    execute_query("varsity.db", "INSERT INTO items (belongsTo, itemName) VALUES (%s, '%s')" % (str(member.id), str(item.upper())))
 
 def get_items(member):
     return db_query("varsity.db", "SELECT itemName FROM items WHERE belongsTo = %s" % (str(member.id)))
 
 def remove_item(item, member):
-    firstItemId = db_query("varsity.db", "SELECT itemId FROM items WHERE belongsTo = %s AND itemName = '%s'" % (str(member.id), str(item)))[0][0]
+    firstItemId = db_query("varsity.db", "SELECT itemId FROM items WHERE belongsTo = %s AND itemName = '%s'" % (str(member.id), str(item.upper())))[0][0]
     execute_query("varsity.db", "DELETE FROM items WHERE itemId = %s" % (str(firstItemId))) #So that only one is removed, users can have multiple of the same item so we can't do it off item name.
     
 def balance_formatter(balance):
@@ -264,8 +264,7 @@ async def check_level_up(userID, guild, channel):
                 await channel.send(embed=discord.Embed(title="Level Up!", description="Congratulations %s! You've reached Level 50! That means you've unlocked the `Extremely Ultra Super Outstandingly Regular` role! You've also been awarded $50000 for your achievement!" % (user.mention), color=0x992D22))
         else:
             Checking = False
-            
-            
+           
 def fetch_exps(userID):
     return db_query("varsity.db", "SELECT Exp, ExpTotal FROM Members WHERE UserID = %s" % (str(userID)))[0]
 
@@ -433,7 +432,7 @@ async def daily(ctx):
                 user = message.author
                 multiplier = reward[1]
                 expires = time.time() + int("".join(reward[2:]))
-                add_booser(user.id, multiplier, expires)
+                add_booster(user.id, multiplier, expires)
                 
         ''' For 100% chance event rewards '''        
         #rewards.append("b <:festive2018:526858321991303176>")
@@ -790,6 +789,70 @@ async def balance(ctx):
         em.set_footer(text="You currently contribute to %s%s of the economy" % (str(round((uBalance/total_balance)*100, 2)), "%")) 
         await ctx.message.channel.send(embed=em)
 
+#!notify
+@Bot.command(client)
+async def notify(ctx):
+    '''
+    Join or leave a notification group
+
+    Required Permission: @Regular
+    Required Arguments: Notifications 
+
+    '''
+    if await hasPerms(1, ctx):
+        message = ctx.message
+        args = ctx.message.content.split()
+        if len(args) == 1:
+            await ctx.send("You can choose to join/leave the following notification groups:\nWindows\nApple\nAndroid\nTech\nServer\nWilfred") 
+        elif args[1].upper() == "WINDOWS":
+            role = discord.utils.get(message.guild.roles, name="Windows Insiders")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Windows Insiders** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Windows Insiders** announcement group")
+        elif args[1].upper() == "APPLE":
+            role = discord.utils.get(message.guild.roles, name="Apple Developers")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Apple Developers** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Apple Developers** announcement group")
+        elif args[1].upper() == "ANDROID":
+            role = discord.utils.get(message.guild.roles, name="Android Beta")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Android Beta** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Android Beta** announcement group")
+        elif args[1].upper() == "TECH":
+            role = discord.utils.get(message.guild.roles, name="Technology")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Technology** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Technology** announcement group")
+        elif args[1].upper() == "SERVER":
+            role = discord.utils.get(message.guild.roles, name="Server Announcements")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Server Announcements** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Server Announcements** announcement group")
+        elif args[1].upper() == "WILFRED":
+            role = discord.utils.get(message.guild.roles, name="Wilfred Development")
+            if not role.name in [r.name for r in message.author.roles]:
+                await message.author.add_roles(role)
+                await message.channel.send("Successfully added you to the **Wilfred Development** announcement group")
+            else:
+                await message.author.remove_roles(role)
+                await message.channel.send("Successfully removed you from the **Wilfred Development** announcement group")    
+
 #!pay
 @Bot.command(client)
 async def pay(ctx):
@@ -929,21 +992,22 @@ async def items(ctx):
         items = get_items(ctx.message.author)
         if len(args) == 1:
             em = discord.Embed(title="Items", description="You currently have the following items:", color=secondary)
-            if items[0][0] is None or len(items[0][0]) == 0:
+            if len(items) == 0:
                 em.add_field(name="No Items", value="We couldn't find any items for you.")
             else:
                 itemStr = ""
                 for each in items: 
-                    itemStr = each[0] + "\n"
+                    itemStr = each[0].capitalize() + "\n"
                 em.add_field(name="Items", value=itemStr)
             em.set_footer(text="Use !items use <item> to use an item")    
             await ctx.message.channel.send(embed=em)
         elif args[1].upper() == "USE":
             itemArray = []
+            item = " ".join(args[2:])
             for each in items:
-                itemArray.append(each.upper())
+                itemArray.append(each[0].upper())
             if not item.upper() in itemArray:
-                await ctx.message.channel("You do not have this item")
+                await ctx.send("You do not have this item")
                 return
             if item.upper() == "MAGICAL RANSACK KEY":
                 """
@@ -1687,7 +1751,8 @@ async def multiplier(ctx):
     if await hasPerms(32, ctx):
         args = ctx.message.content.split(" ")
         multiplier = int(args[1])
-        level_up(1, multiplier)
+        timer = int(args[2])
+        add_booster(1, 2, time.time()+timer)
         await ctx.message.channel.send(":ok_hand:, Successfully set exp multiplier to %s" % (args[1]))
 
 @Bot.command(client)
@@ -1748,6 +1813,7 @@ async def on_ready():
         return
     loop = True
     while True:
+        execute_query("varsity.db", "UPDATE boosters SET isActive=0 WHERE expires < %s" % (str(time.time())))
         try:
             leaderboard = db_query("varsity.db", "SELECT UserID, Level, expTotal FROM Members WHERE NOT UserID = 472063067014823938 AND NOT UserID = 1 ORDER BY expTotal DESC")
             index=0
@@ -1829,10 +1895,12 @@ async def on_message(message):
     if args[0] in ["?playing", "?play", "?next", "?skip", "?playlist", "?register", "?volume", "?say"]:
         if await hasPerms(16, message):
             pass
-        
+    disabled = False    
+    command = args[0].replace("'", "")   
     disabledCommands = db_query("varsity.db", "SELECT command FROM disabledCommands WHERE command = '%s'" % (command))
     if len(disabledCommands) > 0:
         await error("[423] This command is currently disabled", message.channel)
+        disabled = True
     else:
         channel = message.channel
         
@@ -1856,60 +1924,6 @@ async def on_message(message):
 
         #--Role Commands--             
 
-        elif message.content.upper().startswith("!WINDOWS"):
-            role = discord.utils.get(message.guild.roles, name="Windows Insiders")
-            if not role.name in [r.name for r in message.author.roles]:
-                await message.author.add_roles(role)
-                await message.channel.send("Successfully added you to the **Windows Insiders** announcement group")
-            else:
-                await message.author.remove_roles(role)
-                await message.channel.send("Successfully removed you from the **Windows Insiders** announcement group")
-
-        elif message.content.upper().startswith("!APPLE"):
-            role = discord.utils.get(message.guild.roles, name="Apple Developers")
-            if not role.name in [r.name for r in message.author.roles]:
-                await message.author.add_roles(role)
-                await message.channel.send("Successfully added you to the **Apple Developers** announcement group")
-            else:
-                await message.author.remove_roles(role)
-                await message.channel.send("Successfully removed you from the **Apple Developers** announcement group")
-                
-        elif message.content.upper().startswith("!ANDROID"):
-            role = discord.utils.get(message.guild.roles, name="Android Beta")
-            if not role.name in [r.name for r in message.author.roles]:
-                await message.author.add_roles(role)
-                await message.channel.send("Successfully added you to the **Android Beta** announcement group")
-            else:
-                await message.author.remove_roles(role)
-                await message.channel.send("Successfully removed you from the **Android Beta** announcement group")
-                
-        elif message.content.upper().startswith("!TECH"):
-            role = discord.utils.get(message.guild.roles, name="Technology")
-            if not role.name in [r.name for r in message.author.roles]:
-                await message.author.add_roles(role)
-                await message.channel.send("Successfully added you to the **Technology** announcement group")
-            else:
-                await message.author.remove_roles(role)
-                await message.channel.send("Successfully removed you from the **Technology** announcement group")
-                
-        elif message.content.upper().startswith("!SERVER"):
-            role = discord.utils.get(message.guild.roles, name="Server Announcements")
-            if not role.name in [r.name for r in message.author.roles]:
-                await message.author.add_roles(role)
-                await message.channel.send("Successfully added you to the **Server Announcements** announcement group")
-            else:
-                await message.author.remove_roles(role)
-                await message.channel.send("Successfully removed you from the **Server Announcements** announcement group")
-
-        elif message.content.upper().startswith("!WILFRED"):
-            role = discord.utils.get(message.guild.roles, name="Wilfred Development")
-            if not role.name in [r.name for r in message.author.roles]:
-                await message.author.add_roles(role)
-                await message.channel.send("Successfully added you to the **Wilfred Development** announcement group")
-            else:
-                await message.author.remove_roles(role)
-                await message.channel.send("Successfully removed you from the **Wilfred Development** announcement group")
-
         elif message.content.upper().startswith("!SUDO"): #This needs to be moved under cmd-ext; Will be done at later stage ~Frank
             if hasPerms(32, message):
                 args = message.content.split()
@@ -1919,7 +1933,7 @@ async def on_message(message):
                 message.content = contents
                 message.author = target
                 message.channel = channel
-       
+
     if message.channel.id in [473284192491536384, 483940602040549376]:
         hasMsg = db_query("varsity.db", "SELECT devMsg FROM Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
         if hasMsg == 0:
@@ -1954,7 +1968,7 @@ Have fun!""", color=primary)
 
             await message.channel.send(embed=em)
 
-    if not "Restricted" in [role.name for role in message.author.roles]:
+    if not "Restricted" in [role.name for role in message.author.roles] and not disabled:
         await client.process_commands(message)        
 
     if not str(message.author.id) in ignore_list and not str(message.channel.id) in ignore_list and not "Restricted" in [role.name for role in message.author.roles] and not message.guild == None:
