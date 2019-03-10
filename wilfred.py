@@ -322,8 +322,6 @@ def time_phaser(seconds):
         output = output + str(h) + " Hours "
     if m > 0:
         output = output + str(m) + " Minutes "
-    if s > 0:
-        output = output + str(round(s, 0)) + " Seconds "
     return output
 #-----Commands-----
 
@@ -544,7 +542,7 @@ async def shop(ctx):
         em.add_field(name="6) 1 Hour 2* Global Multiplier [$500k]", value="Boost the exp earned for everyone in the whole server for 1 hour. Activates immediately after purchase")
         await message.channel.send(embed=em)
 
-@Bot.command(client)
+@Bot.command(client, aliases=["purchase"])
 async def buy(ctx):
     '''
     Buy an Item
