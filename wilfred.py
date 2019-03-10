@@ -179,55 +179,55 @@ def remove_item(item, member):
     firstItemId = db_query("varsity.db", "SELECT itemId FROM items WHERE belongsTo = %s AND itemName = '%s'" % (str(member.id), str(item.upper())))[0][0]
     execute_query("varsity.db", "DELETE FROM items WHERE itemId = %s" % (str(firstItemId))) #So that only one is removed, users can have multiple of the same item so we can't do it off item name.
     
-def coinsance_formatter(coinsance):
-    ccoinsance = "{:,}".format(coinsance)
-    scoinsance = ccoinsance.split(",")
-    if len(scoinsance) == 0:
-        return str(coinsance)
-    elif len(scoinsance) == 2:
+def balance_formatter(balance):
+    cBalance = "{:,}".format(balance)
+    sBalance = cBalance.split(",")
+    if len(sBalance) == 0:
+        return str(balance)
+    elif len(sBalance) == 2:
         sign = "K"
-    elif len(scoinsance) == 3:
+    elif len(sBalance) == 3:
         sign = "M"
-    elif len(scoinsance) == 4:
+    elif len(sBalance) == 4:
         sign = "B"
-    elif len(scoinsance) == 5:
+    elif len(sBalance) == 5:
         sign = "T"
-    elif len(scoinsance) >= 6:
+    elif len(sBalance) >= 6:
         sign = "Q"
-    fcoinsance = scoinsance[0] + "." + scoinsance[1][0:2] + sign
-    return fcoinsance
+    fBalance = sBalance[0] + "." + sBalance[1][0:2] + sign
+    return fBalance
     
-def set_coins(user, coins):
+def set_bal(user, bal):
     user_id = user.id
-    execute_query("varsity.db", "UPDATE Members SET coinsance = %s WHERE UserID = %s" % (str(coins), str(user_id)))
+    execute_query("varsity.db", "UPDATE Members SET Balance = %s WHERE UserID = %s" % (str(bal), str(user_id)))
 
-def set_coins_id(user_id, coins):
-    execute_query("varsity.db", "UPDATE Members SET coinsance = %s WHERE UserID = %s" % (str(coins), str(user_id)))
+def set_bal_id(user_id, bal):
+    execute_query("varsity.db", "UPDATE Members SET Balance = %s WHERE UserID = %s" % (str(bal), str(user_id)))
     
 #def fetch_items(userID):
 #    return db_query("varsity.db", "SELECT items FROM Members WHERE UserID = %s" % (str(userID)))
 
-def fetch_coins(user):
+def fetch_bal(user):
     user_id = user.id
-    coins = db_query("varsity.db", "SELECT coinsance FROM Members WHERE UserID = %s" % (str(user_id)))[0][0]
-    return coins
+    bal = db_query("varsity.db", "SELECT Balance FROM Members WHERE UserID = %s" % (str(user_id)))[0][0]
+    return bal
 
-def fetch_coins_id(user_id):
-    coins = db_query("varsity.db", "SELECT coinsance FROM Members WHERE UserID = %s" % (str(user_id)))[0][0]
-    return coins
+def fetch_bal_id(user_id):
+    bal = db_query("varsity.db", "SELECT Balance FROM Members WHERE UserID = %s" % (str(user_id)))[0][0]
+    return bal
 
-def add_coins(user, amount):
-    current_coins = fetch_coins(user)
-    new_coins = int(current_coins) + int(amount)
-    set_coins(user, new_coins)
+def add_bal(user, amount):
+    current_bal = fetch_bal(user)
+    new_bal = int(current_bal) + int(amount)
+    set_bal(user, new_bal)
 
-def add_coins_id(user_id, amount):
-    current_coins = fetch_coins_id(user_id)
-    new_coins = int(current_coins) + int(amount)
-    set_coins_id(user_id, new_coins)    
+def add_bal_id(user_id, amount):
+    current_bal = fetch_bal_id(user_id)
+    new_bal = int(current_bal) + int(amount)
+    set_bal_id(user_id, new_bal)    
 
 def get_profile(userID):
-    profile = db_query("varsity.db", "SELECT coinsance, Level, expTotal, Badges, profileColour, profileHashtag, exp, statAtk, statDef, statHp FROM Members WHERE UserID = %s" % (userID))[0]
+    profile = db_query("varsity.db", "SELECT Balance, Level, expTotal, Badges, profileColour, profileHashtag, exp, statAtk, statDef, statHp FROM Members WHERE UserID = %s" % (userID))[0]
     return profile
 
 def level_up(userID, level):
@@ -248,31 +248,31 @@ async def check_level_up(userID, guild, channel):
                 new_role = discord.utils.get(guild.roles, name="Uber Regular")
                 user = discord.utils.get(guild.members, id=userID)
                 await user.add_roles(new_role)
-                add_coins(user, 10000)
+                add_bal(user, 10000)
                 await channel.send(embed=discord.Embed(title="Level Up!", description="Congratulations %s! You've reached Level 10! That means you've unlocked the `Uber Regular` role! You've also been awarded $10000 for your achievement!" % (user.mention), color=0xF1C40F))  
             if lvl == 20:
                 new_role = discord.utils.get(guild.roles, name="Outstandingly Regular")
                 user = discord.utils.get(guild.members, id=userID)
                 await user.add_roles(new_role)
-                add_coins(user, 20000)
+                add_bal(user, 20000)
                 await channel.send(embed=discord.Embed(title="Level Up!", description="Congratulations %s! You've reached Level 20! That means you've unlocked the `Outstandingly Regular` role! You've also been awarded $20000 for your achievement!" % (user.mention), color=0xE91E63))
             if lvl == 30:
                 new_role = discord.utils.get(guild.roles, name="Super! Outstandingly Regular")
                 user = discord.utils.get(guild.members, id=userID)
                 await user.add_roles(new_role)
-                add_coins(user, 30000)
+                add_bal(user, 30000)
                 await channel.send(embed=discord.Embed(title="Level Up!", description="Congratulations %s! You've reached Level 30! That means you've unlocked the `Super Outstandingly Regular` role! You've also been awarded $30000 for your achievement!" % (user.mention), color=0xE67E22))
             if lvl == 40:
                 new_role = discord.utils.get(guild.roles, name="Ultra Super Outstandingly Regular")
                 user = discord.utils.get(guild.members, id=userID)
                 await user.add_roles(new_role)
-                add_coins(user, 40000)
+                add_bal(user, 40000)
                 await channel.send(embed=discord.Embed(title="Level Up!", description="Congratulations %s! You've reached Level 40! That means you've unlocked the `Ultra Super Outstandingly Regular` role! You've also been awarded $40000 for your achievement!" % (user.mention), color=0xE74C3C))
             if lvl == 50:
                 new_role = discord.utils.get(guild.roles, name="Extremely Ultra Super Outstandingly Regular")
                 user = discord.utils.get(guild.members, id=userID)
                 await user.add_roles(new_role)
-                add_coins(user, 50000)
+                add_bal(user, 50000)
                 await channel.send(embed=discord.Embed(title="Level Up!", description="Congratulations %s! You've reached Level 50! That means you've unlocked the `Extremely Ultra Super Outstandingly Regular` role! You've also been awarded $50000 for your achievement!" % (user.mention), color=0x992D22))
         else:
             Checking = False
@@ -428,7 +428,7 @@ async def daily(ctx):
                 
         async def applyReward(reward):
             if reward[0] == "c":
-                add_coins(message.author, int("".join(reward[1:])))
+                add_bal(message.author, int("".join(reward[1:])))
             elif reward[0] == "e":
                 add_exp(message.author.id, int("".join(reward[1:])))
             elif reward[0] == "i":
@@ -551,7 +551,7 @@ async def shop(ctx):
         em.add_field(name="3) 1 Day Royalty Role [$1m]", value="Show off how rich you are with the Royalty Role. You'll be given a bright green name which comes with immense bragging rights! Expires after 24 hours")
         em.add_field(name="4) 24 Hour 2* Personal Multiplier [$2m]", value="Boost your exp by 2 for 24 hours. Activates immeidately after purchase")
         em.add_field(name="5) 1 Hour 3* Personal Multiplier [$2m]", value="Boost your exp by 3 for 1 hour. Activates immediately after purchase")
-        em.add_field(name="6) 1 Hour 2* Glocoins Multiplier [$500k]", value="Boost the exp earned for everyone in the whole server for 1 hour. Activates immediately after purchase")
+        em.add_field(name="6) 1 Hour 2* Global Multiplier [$500k]", value="Boost the exp earned for everyone in the whole server for 1 hour. Activates immediately after purchase")
         await message.channel.send(embed=em)
 
 @Bot.command(client, aliases=["purchase"])
@@ -567,32 +567,32 @@ async def buy(ctx):
         message = ctx.message
         args = message.content.split()
         if args[1] == "1":
-            if fetch_coins(message.author) >= 5000000:
+            if fetch_bal(message.author) >= 5000000:
                 em = discord.Embed(title="Purchase Complete", description="You have successfully purchased `1 Week Custom Role`.\nNote: `Please contact a moderator for your role`", color=reds)
-                add_coins(message.author, -5000000)
+                add_bal(message.author, -5000000)
                 await message.channel.send(embed=em)
             else:
                 await message.channel.send("Insufficient Funds")
         if args[1] == "2":
-            if fetch_coins(message.author) >= 3000000:
+            if fetch_bal(message.author) >= 3000000:
                 em = discord.Embed(title="Purchase Complete", description="You have successfully purchased `1 Week Royalty Role`.\nNote: `Please contact a moderator for your role`", color=reds)
-                add_coins(message.author, -3000000)
+                add_bal(message.author, -3000000)
                 await message.channel.send(embed=em)
             else:
                 await message.channel.send("Insufficient Funds")
         if args[1] == "3":
-            if fetch_coins(message.author) >= 1000000:
+            if fetch_bal(message.author) >= 1000000:
                 em = discord.Embed(title="Purchase Complete", description="You have successfully purchased `1 Day Royalty Role`.\nNote: `Please contact a moderator for your role`", color=reds)
-                add_coins(message.author, -1000000)
+                add_bal(message.author, -1000000)
                 await message.channel.send(embed=em)
             else:
                 await message.channel.send("Insufficient Funds")
         if args[1] == "4":
             if get_booster(message.author.id) > 1:
                 await error("You already have an active exp booster", ctx.message.channel)
-            elif fetch_coins(message.author) >= 2000000:
+            elif fetch_bal(message.author) >= 2000000:
                 em = discord.Embed(title="Purchase Complete", description="You have successfully purchased `24 Hour 2* Personal Multiplier`.", color=reds)
-                add_coins(message.author, -2000000)
+                add_bal(message.author, -2000000)
                 await message.channel.send(embed=em)
                 add_booster(message.author.id, 2, time.time()+86400)
                 #execute_query("varsity.db", "UPDATE Members SET expPersonalBoost = 2 WHERE UserID = %s" % (message.author.id))
@@ -601,20 +601,20 @@ async def buy(ctx):
         if args[1] == "5":
             if get_booster(message.author.id) > 1:
                 await error("You already have an active exp booster", ctx.message.channel)
-            elif fetch_coins(message.author) >= 2000000:
+            elif fetch_bal(message.author) >= 2000000:
                 em = discord.Embed(title="Purchase Complete", description="You have successfully purchased `1 Hour 3* Personal Multiplier`.", color=reds)
-                add_coins(message.author, -2000000)
+                add_bal(message.author, -2000000)
                 await message.channel.send(embed=em)
                 add_booster(message.author.id, 3, time.time()+3600)
             else:
                 await message.channel.send("Insufficient Funds")        
         if args[1] == "6":
-            if fetch_coins(message.author) >= 500000:
+            if fetch_bal(message.author) >= 500000:
                 if get_booster(1) > 1:
                     await error("There is already an active booster", ctx.message.channel)
                 else:    
-                    em = discord.Embed(title="Purchase Complete", value="You have successfully purchased `1 Hour 2* Glocoins Multipler`.", color=reds)
-                    add_coins(message.author, -500000)
+                    em = discord.Embed(title="Purchase Complete", value="You have successfully purchased `1 Hour 2* Global Multipler`.", color=reds)
+                    add_bal(message.author, -500000)
                     await message.channel.send(embed=em)
                     add_booster(1, 2, time.time()+3600)
             else:
@@ -644,9 +644,9 @@ async def help(ctx):
         specialCommands = specialCommands + "!embed {message}\n"
     if await hasPerms(16, ctx, giveOutput=False):
         specialCommands = specialCommands + "!kitten\n"
-    helpEm.add_field(name="<:member:486269178047627266> User Commands", value="!debug\n!daily\n!coinflip <bet>\n!shop\n!profile [@user]\n!pay <@user> <amount>\n!ransack <@user> <amount>\n!ping\n!coinsance\n!tag <tag>\n!suggest <suggestion>\n!comment <suggestion-id> <comment>\n" + specialCommands, inline=False)
+    helpEm.add_field(name="<:member:486269178047627266> User Commands", value="!debug\n!daily\n!coinflip <bet>\n!shop\n!profile [@user]\n!pay <@user> <amount>\n!ransack <@user> <amount>\n!ping\n!balance\n!tag <tag>\n!suggest <suggestion>\n!comment <suggestion-id> <comment>\n" + specialCommands, inline=False)
     if await hasPerms(32, ctx, giveOutput=False) or ctx.message.author.id in admin_bypass:
-        helpEm.add_field(name="<:Staff:522185091187867668> Moderation Commands", value="!punish <@user> {reason}\n!suggestion <suggestion-id> <attribute> <value>\n!enable <command>\n!disable <command>\n!badge <add|remove> <emoji> <@user>\n!statmod <@user> <set|add|sub> <coinsance|exp|statwipe> {amount}\n!announce <type> <message>\n!raffle <minutes> <item>\n!giveitem <@user> <item> <amount>", inline=False)
+        helpEm.add_field(name="<:Staff:522185091187867668> Moderation Commands", value="!punish <@user> {reason}\n!suggestion <suggestion-id> <attribute> <value>\n!enable <command>\n!disable <command>\n!badge <add|remove> <emoji> <@user>\n!statmod <@user> <set|add|sub> <balance|exp|statwipe> {amount}\n!announce <type> <message>\n!raffle <minutes> <item>\n!giveitem <@user> <item> <amount>", inline=False)
     await ctx.message.channel.send(embed=helpEm)
 
 #!rewards
@@ -755,9 +755,9 @@ async def profile(ctx):
                 lpos = lpos + 1
             else:
                 break
-        coinss = db_query("varsity.db", "SELECT UserID FROM Members WHERE NOT UserID = 472063067014823938 AND NOT UserID = 1 ORDER BY coinsance DESC")
+        bals = db_query("varsity.db", "SELECT UserID FROM Members WHERE NOT UserID = 472063067014823938 AND NOT UserID = 1 ORDER BY Balance DESC")
         bpos = 1
-        for userb in coinss:
+        for userb in bals:
             if not userb[0] == user.id:
                 bpos = bpos + 1
             else:
@@ -773,30 +773,30 @@ async def profile(ctx):
         em.add_field(name="Level", value=str(profile[1])+" [**" + str(exp) + "/" + str(expCost)+"**]")
         em.add_field(name="Experience", value=str(profile[2])+ " [**#" + str(lpos) + "**]")
         em.add_field(name="Member Since", value=str(user.joined_at)[0:19])
-        em.add_field(name="coinsance", value="$"+str(coinsance_formatter(int(profile[0])))+" [**#%s**]" % (str(bpos)))
+        em.add_field(name="Balance", value="$"+str(balance_formatter(int(profile[0])))+" [**#%s**]" % (str(bpos)))
         if not profile[5] is None:    
             em.set_footer(text="#"+profile[5])
         await message.channel.send(embed=em)
         
-#!coins        
-@Bot.command(client, aliases=["coins"])
-async def coinsance(ctx):
+#!bal        
+@Bot.command(client, aliases=["bal"])
+async def balance(ctx):
     '''
-    View your coinsance
+    View your balance
 
     Required Permission: @Regular
     
     '''
     if await hasPerms(1, ctx):
         profile = get_profile(str(ctx.message.author.id))
-        ucoinsance = profile[0]
-        coinsances = db_query("varsity.db", "SELECT coinsance FROM Members WHERE NOT UserID = 1 AND NOT UserID = 472063067014823938 ORDER BY coinsance DESC")
-        total_coinsance = 0
-        highest_coinsance = coinsances[0][0]
-        for coinsance in coinsances:
-            total_coinsance = total_coinsance+coinsance[0]
-        em = discord.Embed(title="coinsance", description="You currently have **$%s**\nThe server total is **$%s**\nThe server average is **$%s**" % (str("{:,}".format(ucoinsance)), str("{:,}".format(total_coinsance)), str("{:,}".format(int(round(total_coinsance/len(ctx.message.guild.members),0))))), color=primary)   
-        em.set_footer(text="You currently contribute to %s%s of the economy" % (str(round((ucoinsance/total_coinsance)*100, 2)), "%")) 
+        uBalance = profile[0]
+        balances = db_query("varsity.db", "SELECT Balance FROM Members WHERE NOT UserID = 1 AND NOT UserID = 472063067014823938 ORDER BY Balance DESC")
+        total_balance = 0
+        highest_balance = balances[0][0]
+        for balance in balances:
+            total_balance = total_balance+balance[0]
+        em = discord.Embed(title="Balance", description="You currently have **$%s**\nThe server total is **$%s**\nThe server average is **$%s**" % (str("{:,}".format(uBalance)), str("{:,}".format(total_balance)), str("{:,}".format(int(round(total_balance/len(ctx.message.guild.members),0))))), color=primary)   
+        em.set_footer(text="You currently contribute to %s%s of the economy" % (str(round((uBalance/total_balance)*100, 2)), "%")) 
         await ctx.message.channel.send(embed=em)
 
 #!notify
@@ -876,8 +876,8 @@ async def pay(ctx):
     if await hasPerms(1, ctx):
         message = ctx.message
         args = message.content.split()
-        coinsance = fetch_coins(message.author)
-        if int(args[2]) > coinsance:
+        balance = fetch_bal(message.author)
+        if int(args[2]) > balance:
             await message.channel.send("Transaction Rejected\n_ - _ `Insufficient Funds`")
         else:
             user = discord.utils.get(message.guild.members, mention=args[1])
@@ -896,8 +896,8 @@ async def pay(ctx):
                 await channel.send("No Response - Transaction Cancelled")
             else:
                 if msg.content.upper() == "Y" or msg.content.upper() == "YES":
-                    add_coins(message.author, -int(amount))
-                    add_coins(user, int(amount))
+                    add_bal(message.author, -int(amount))
+                    add_bal(user, int(amount))
                     await message.channel.send(":ok_hand: Transaction Complete")
                 elif msg.content.upper() == "N" or msg.content.upper() == "NO":
                         await message.channel.send("Transaction Declined")
@@ -939,10 +939,10 @@ async def ransack(ctx):
             return False
         
         amount = int(args[2])
-        if fetch_coins(user) < amount:
-            await error("[400] Target User Does Not Have Enough coinsance!", message.channel)
-        elif fetch_coins(message.author) < amount:
-            await error("[400] You don't have enough coinsance for this!", message.channel)
+        if fetch_bal(user) < amount:
+            await error("[400] Target User Does Not Have Enough Balance!", message.channel)
+        elif fetch_bal(message.author) < amount:
+            await error("[400] You don't have enough balance for this!", message.channel)
         elif amount < 25000:
             await error("[400] Amount must be above $25000", message.channel) 
         elif message.author == user:
@@ -951,15 +951,15 @@ async def ransack(ctx):
             execute_query("varsity.db", "UPDATE Members SET lastRansack = %s WHERE UserID=%s" % (str(otime), str(message.author.id)))
             chance = random.randint(1, int(round(amount/10000, 0)))
             if chance == 1:
-                add_coins(user, -amount)
-                add_coins(message.author, amount)
+                add_bal(user, -amount)
+                add_bal(message.author, amount)
                 await message.channel.send(embed=discord.Embed(title="Ransack", description="Congrats! You successfully ransacked **%s** for **$%s**!\nYou may try again in 15 minutes." % (user.name, str(amount)), color=primary)) 
                 execute_query("varsity.db", "UPDATE Members SET lastGotRansackTime = %s WHERE UserID = %s" % (str(otime), str(user.id)))
                 execute_query("varsity.db", "UPDATE Members SET lastGotRansackAmount = %s WHERE UserID = %s" % (str(amount), str(user.id)))
             else:
-                add_coins(message.author, -amount)
+                add_bal(message.author, -amount)
                 await message.channel.send(embed=discord.Embed(title="Ransack", description="You failed to ransack **%s** and were fined **$%s** for your attempt!\nYou may try again in 15 minutes." % (user.name, str(amount)), color=0xFF5555))
-                add_coins(user, int(round(amount/2, 0)))
+                add_bal(user, int(round(amount/2, 0)))
 
 #!suggest
 @Bot.command(client)
@@ -1021,7 +1021,7 @@ async def items(ctx):
                 return
             if item.upper() == "MAGICAL RANSACK KEY":
                 """
-                This Key Will Allow The User To Ransack 25% Of A Users coinsance Without Fail
+                This Key Will Allow The User To Ransack 25% Of A Users Balance Without Fail
                 """
                 await ctx.message.channel.send("Please tag the user you would like to ransack or type 'N' to exit")
                 def check(m):
@@ -1038,16 +1038,16 @@ async def items(ctx):
                         if target is None:
                             await msg.channel.send("Invalid User")
                         else:
-                            coinsance = fetch_coins(target)
-                            nicked = int(round(coinsance*0.25, 0))
-                            add_coins(target, -nicked)
-                            add_coins(msg.author, nicked)
+                            balance = fetch_bal(target)
+                            nicked = int(round(balance*0.25, 0))
+                            add_bal(target, -nicked)
+                            add_bal(msg.author, nicked)
                             await msg.channel.send("Successfully ransacked %s for $%s!" % (target.mention, str(nicked)))
 
                             remove_item("MAGICAL RANSACK KEY", ctx.message.author) 
             elif item.upper() == "MYTHICAL RANSACK KEY":
                 """
-                This Key Will Allow The User To Ransack 50% Of A Users coinsance Without Fail
+                This Key Will Allow The User To Ransack 50% Of A Users Balance Without Fail
                 """
                 await ctx.message.channel.send("Please tag the user you would like to ransack or type 'N' to exit")
 
@@ -1065,10 +1065,10 @@ async def items(ctx):
                         if target is None:
                             await msg.channel.send("Invalid User")
                         else:
-                            coinsance = fetch_coins(target)
-                            nicked = int(round(coinsance*0.5, 0))
-                            add_coins(target, -nicked)
-                            add_coins(msg.author, nicked)
+                            balance = fetch_bal(target)
+                            nicked = int(round(balance*0.5, 0))
+                            add_bal(target, -nicked)
+                            add_bal(msg.author, nicked)
                             await msg.channel.send("Successfully ransacked %s for $%s!" % (target.mention, str(nicked)))
 
                             remove_item("MYTHICAL RANSACK KEY", ctx.message.author)
@@ -1107,7 +1107,7 @@ async def train(ctx):
 
     '''
     if await hasPerms(2, ctx):
-        glocoins training
+        global training
         message = ctx.message
         args = message.content.split()
         user = message.author
@@ -1120,7 +1120,7 @@ async def train(ctx):
             em=discord.Embed(title="Stats", description="`Attack: %s` **[Upgrade Cost: `$%s`]**\n`Defense: %s` **[Upgrade Cost: `$%s`]**\n`HP: %s` **[Upgrade Cost: `$%s`]**" % (str(userStats[0]), str(userStats[0]*1000), str(userStats[1]), str(userStats[1]*1000), str(userStats[2]), str(userStats[2]*1000)), color=primary)
             await message.channel.send(embed=em)
         elif args[1].upper() == "ATTACK":
-            if not fetch_coins(user) >= userStats[0]*1000:
+            if not fetch_bal(user) >= userStats[0]*1000:
                 await message.channel.send("Insufficient Funds")
             elif userStats[0] >= 300:
                 await message.channel.send("Cannot Upgrade Past 300")
@@ -1139,13 +1139,13 @@ async def train(ctx):
                     if str(reaction.emoji) == "\U0001F44D":
                         attackNew = userStats[0] + 5
                         execute_query("varsity.db", "UPDATE Members SET statAtk = %s WHERE UserID = %s" % (str(attackNew), str(user.id)))
-                        add_coins(user, -userStats[0]*1000)
+                        add_bal(user, -userStats[0]*1000)
                         await message.channel.send("Success") 
                     elif str(reaction.emoji) == "\U0001F44E":
                         await message.channel.send("Cancelled") 
                 await confirmation.clear_reactions()
         elif args[1].upper() == "DEFENSE":
-            if not fetch_coins(user) >= userStats[1]*1000:
+            if not fetch_bal(user) >= userStats[1]*1000:
                 await message.channel.send("Insufficient Funds")
             elif userStats[1] >= 300:
                 await message.channel.send("Cannot Upgrade Past 300")    
@@ -1164,13 +1164,13 @@ async def train(ctx):
                     if str(reaction.emoji) == "\U0001F44D":
                         defenseNew = userStats[1] + 5
                         execute_query("varsity.db", "UPDATE Members SET statDef = %s WHERE UserID = %s" % (str(defenseNew), str(user.id)))
-                        add_coins(user, -userStats[1]*1000)
+                        add_bal(user, -userStats[1]*1000)
                         await message.channel.send("Success") 
                     elif str(reaction.emoji) == "\U0001F44E":
                         await message.channel.send("Cancelled")
                 await confirmation.clear_reactions()
         elif args[1].upper() == "HP":
-            if not fetch_coins(user) >= userStats[2]*1000:
+            if not fetch_bal(user) >= userStats[2]*1000:
                 await message.channel.send("Insufficient Funds")
             elif userStats[0] >= 450:
                 await message.channel.send("Cannot Upgrade Past 450")    
@@ -1189,7 +1189,7 @@ async def train(ctx):
                     if str(reaction.emoji) == "\U0001F44D":
                         hpNew = userStats[2] + 5
                         execute_query("varsity.db", "UPDATE Members SET statHp = %s WHERE UserID = %s" % (str(hpNew), str(user.id)))
-                        add_coins(user, -userStats[2]*1000)
+                        add_bal(user, -userStats[2]*1000)
                         await message.channel.send("Success") 
                     elif str(reaction.emoji) == "\U0001F44E":
                         await message.channel.send("Cancelled")
@@ -1329,7 +1329,7 @@ async def battle(ctx):
 
     '''
     if await hasPerms(2, ctx): 
-        glocoins battleInProgress
+        global battleInProgress
         moves = ["Bitch Slap", "Fake News", "Flex Tape", "A Trap", "Windows Update", "A Chair", "Train Delays", "The Infinity Gauntlet", "Dark Magic"] 
         message = ctx.message
         args = message.content.split()
@@ -1411,7 +1411,7 @@ async def ban(ctx):
 
     '''
     if await hasPerms(3, ctx):
-        if fetch_coins(ctx.message.author) >= 15000 or "Moderators" in [role.name for role in ctx.message.author.roles]:
+        if fetch_bal(ctx.message.author) >= 15000 or "Moderators" in [role.name for role in ctx.message.author.roles]:
             args = ctx.message.content.split(" ")
             target = discord.utils.get(ctx.message.guild.members, mention=args[1])
             issuer = ctx.message.author
@@ -1419,7 +1419,7 @@ async def ban(ctx):
             em = discord.Embed(title="Punish", description="**%s** has banned **%s** for **9001 Days** for `%s`" % (issuer.name, target.name, reason), color=primary)
             await ctx.send(embed=em)
             if not "Moderators" in [role.name for role in ctx.message.author.roles]:
-                add_coins(ctx.message.author, -15000)
+                add_bal(ctx.message.author, -15000)
 
 #!hug
 @Bot.command(client)
@@ -1449,7 +1449,7 @@ async def fight(ctx):
     message = ctx.message
     args = message.content.split()
     if await hasPerms(4, ctx):
-        glocoins battleInProgress
+        global battleInProgress
         if battleInProgress:
             await error("A Fight Is Already In Progress, Please Wait", message.channel)
             return
@@ -1618,7 +1618,7 @@ async def statmod(ctx, *args):
         profile = get_profile(user.id)
         if len(args) == 2:
             em = discord.Embed(title="Statmod", description="You are able to modify the following stats for user %s" % (user.name), color=reds)
-            em.add_field(name="coinsance", value=str(profile[0]))
+            em.add_field(name="balance", value=str(profile[0]))
             em.add_field(name="profileColour", value=str(profile[4]))
             em.add_field(name="profileHashtag", value=str(profile[5]))
             em.add_field(name="exp", value=str(profile[2]))
@@ -1631,9 +1631,9 @@ async def statmod(ctx, *args):
         else:   
             subcommand = args[2]
             if subcommand.upper() == "SET":
-                if args[3].upper() == "coinsANCE":
-                    set_coins(user, int(args[4]))
-                    await message.channel.send(":ok_hand: Successfully set %s's coinsance to $%s" % (user.mention, args[4]))
+                if args[3].upper() == "BALANCE":
+                    set_bal(user, int(args[4]))
+                    await message.channel.send(":ok_hand: Successfully set %s's balance to $%s" % (user.mention, args[4]))
                 elif args[3].upper() == "PROFILECOLOUR":
                     execute_query("varsity.db", "UPDATE Members SET profileColour = '%s' WHERE UserID = %s" % (str(args[4]), str(user.id)))
                     await message.channel.send(":ok_hand: Successfully set %s's profile colour to %s" % (str(user.mention), str(args[4])))
@@ -1653,9 +1653,9 @@ async def statmod(ctx, *args):
                     await message.channel.send("%s does not support SET modifier" % (args[3].lower()))    
 
             elif subcommand.upper() == "ADD":
-                if args[3].upper() == "coinsANCE":
-                    add_coins(user, int(args[4]))
-                    await message.channel.send(":ok_hand: Successfully added $%s to %s's coinsance!" % (args[4], user.mention))
+                if args[3].upper() == "BALANCE":
+                    add_bal(user, int(args[4]))
+                    await message.channel.send(":ok_hand: Successfully added $%s to %s's balance!" % (args[4], user.mention))
                 elif args[3].upper() == "STATATK":
                     new = int(args[4]) + int(profile[7])
                     execute_query("varsity.db", "UPDATE Members SET statAtk = %s WHERE UserID = %s" % (str(new), str(user.id)))
@@ -1699,7 +1699,7 @@ async def statmod(ctx, *args):
                     await confirmation.clear_reactions()
             else:
                 em = discord.Embed(title="Statmod", description="You are able to modify the following stats for user %s" % (user.name), color=reds)
-                em.add_field(name="coinsance", value=str(profile[0]))
+                em.add_field(name="balance", value=str(profile[0]))
                 em.add_field(name="profileColour", value=str(profile[4]))
                 em.add_field(name="profileHashtag", value=str(profile[5]))
                 em.add_field(name="exp", value=str(profile[2]))
@@ -1729,8 +1729,8 @@ async def announce(ctx):
 @Bot.command(client)
 async def raffle(ctx):
     if await hasPerms(16, ctx):
-        glocoins enteries
-        glocoins raffles
+        global enteries
+        global raffles
         args = ctx.message.content.split(" ")
         item = " ".join(args[2:])
         time = int(args[1])*60
@@ -1805,7 +1805,7 @@ async def suggestion(ctx):
         
 @client.event
 async def on_ready():
-    glocoins Loop
+    global Loop
     print("active")
     execute_query("varsity.db", "UPDATE Members SET expPersonalBoost = 1")
     level_up(1, 1)
@@ -1818,7 +1818,7 @@ async def on_ready():
         except:
             pass
     LBoardExp = await channel.get_message(521326939529805845)
-    LBoardcoins = await channel.get_message(521326947150856235)
+    LBoardBal = await channel.get_message(521326947150856235)
     if Loop:
         return
     loop = True
@@ -1846,7 +1846,7 @@ async def on_ready():
             em.set_footer(text="Last Updated: %s" % (time.strftime("%a, %H:%M:%S", time.gmtime()))) 
             await LBoardExp.edit(embed=em, content=None)
 
-            leaderboard = db_query("varsity.db", "SELECT UserID, coinsance FROM Members WHERE NOT UserID = 472063067014823938 AND NOT UserID = 1 ORDER BY coinsance DESC")
+            leaderboard = db_query("varsity.db", "SELECT UserID, Balance FROM Members WHERE NOT UserID = 472063067014823938 AND NOT UserID = 1 ORDER BY Balance DESC")
             index = 0
             for userID in leaderboard:
                 user = discord.utils.get(channel.guild.members, id=userID[0])
@@ -1856,19 +1856,19 @@ async def on_ready():
                     leaderboard.pop(index)
                 index = index+1    
             lbString = ""
-            lbString = lbString + ":crown: **1st <@%s> - $%s**\n_ _\n" % (str(leaderboard[0][0]), str(coinsance_formatter(leaderboard[0][1])))
-            lbString = lbString + "**2nd <@%s> - $%s**\n_ _\n" % (str(leaderboard[1][0]), str(coinsance_formatter(leaderboard[1][1])))
-            lbString = lbString + "**3rd <@%s> - $%s**\n_ _\n" % (str(leaderboard[2][0]), str(coinsance_formatter(leaderboard[2][1]))) 
+            lbString = lbString + ":crown: **1st <@%s> - $%s**\n_ _\n" % (str(leaderboard[0][0]), str(balance_formatter(leaderboard[0][1])))
+            lbString = lbString + "**2nd <@%s> - $%s**\n_ _\n" % (str(leaderboard[1][0]), str(balance_formatter(leaderboard[1][1])))
+            lbString = lbString + "**3rd <@%s> - $%s**\n_ _\n" % (str(leaderboard[2][0]), str(balance_formatter(leaderboard[2][1]))) 
             for count in range(3,10):
-                lbString = lbString + "%sth <@%s> - $%s\n" % (str(count+1), str(leaderboard[count][0]), str(coinsance_formatter(leaderboard[count][1])))
-            total_coinsance = 0    
-            for coinsance in leaderboard:
-                    total_coinsance = total_coinsance+coinsance[1]
+                lbString = lbString + "%sth <@%s> - $%s\n" % (str(count+1), str(leaderboard[count][0]), str(balance_formatter(leaderboard[count][1])))
+            total_balance = 0    
+            for balance in leaderboard:
+                    total_balance = total_balance+balance[1]
 
-            lbString = lbString + "_ _\nThe servers total coinsance is: **$%s**" % (coinsance_formatter(total_coinsance))        
-            em = discord.Embed(title="coinstop", description=lbString, colour=secondary)
+            lbString = lbString + "_ _\nThe servers total balance is: **$%s**" % (balance_formatter(total_balance))        
+            em = discord.Embed(title="Baltop", description=lbString, colour=secondary)
             em.set_footer(text="Last Updated: %s" % (time.strftime("%a, %H:%M:%S", time.gmtime()))) 
-            await LBoardcoins.edit(embed=em, content=None)
+            await LBoardBal.edit(embed=em, content=None)
 
             multiplier = get_booster(1)
             for member in client.get_channel(529107387559444500).members:
@@ -1924,8 +1924,8 @@ async def on_message(message):
             await message.delete()        
       
         elif message.content.upper().startswith("!ENTER"):
-            glocoins raffles
-            glocoins enteries
+            global raffles
+            global enteries
             if raffles and not message.author.name in enteries:
                 enteries.append(message.author.name)
                 await message.channel.send("%s has been entered!" % (message.author.name))
@@ -1985,21 +1985,21 @@ Have fun!""", color=primary)
         if not message.author.id in cooldown:
             multiplier = get_booster(1)
             pMultiplier = get_booster(message.author.id)
-            coins = db_query("varsity.db", "SELECT coinsance FROM Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
+            bal = db_query("varsity.db", "SELECT Balance FROM Members WHERE UserID = %s" % (str(message.author.id)))[0][0]
             level = get_profile(message.author.id)[1]
             cooldown.append(message.author.id)
-            coinsances = db_query("varsity.db", "SELECT coinsance FROM Members WHERE NOT UserID = 1 AND NOT UserID = 472063067014823938 ORDER BY coinsance DESC")
-            total_coinsance = 0
-            for coinsance in coinsances:
-                total_coinsance = total_coinsance+coinsance[0]
-            coins_add = random.randint(25,50)*level*multiplier*pMultiplier    
-            if (coins/total_coinsance) * 100 > 25:
-                coins_add = coins_add * 0.15
-            elif (coins/total_coinsance) * 100 > 15:
-                coins_add = coins_add * 0.50
-            elif (coins/total_coinsance) * 100 > 15:
-                coins_add = coins_add * 0.75    
-            add_coins(message.author, coins_add)
+            balances = db_query("varsity.db", "SELECT Balance FROM Members WHERE NOT UserID = 1 AND NOT UserID = 472063067014823938 ORDER BY Balance DESC")
+            total_balance = 0
+            for balance in balances:
+                total_balance = total_balance+balance[0]
+            bal_add = random.randint(25,50)*level*multiplier*pMultiplier    
+            if (bal/total_balance) * 100 > 25:
+                bal_add = bal_add * 0.15
+            elif (bal/total_balance) * 100 > 15:
+                bal_add = bal_add * 0.50
+            elif (bal/total_balance) * 100 > 15:
+                bal_add = bal_add * 0.75    
+            add_bal(message.author, bal_add)
             exp_add = int(random.randint(15, 25)*multiplier*pMultiplier)
             add_exp(message.author.id, exp_add)
             await check_level_up(message.author.id, message.guild, message.channel)
